@@ -1,0 +1,81 @@
+.service-display {
+  text-align: center;
+  padding: 20px;
+}
+
+.service-display h2 {
+  font-size: max(2.5vw, 24px);
+  font-weight: 600;
+  color: #1a237e;
+}
+
+.service-display-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  margin-top: 30px;
+  gap: 25px;
+  row-gap: 40px;
+  padding: 0 20px;
+}
+
+/* Loading state styles */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  margin-top: 30px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #1a237e;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-container p {
+  color: #666;
+  font-size: 16px;
+  margin: 0;
+}
+
+/* Error state styles */
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  margin-top: 30px;
+}
+
+.error-container p {
+  color: #d32f2f;
+  font-size: 16px;
+  margin-bottom: 16px;
+}
+
+.retry-btn {
+  background-color: #1a237e;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.retry-btn:hover {
+  background-color: #303f9f;
+}

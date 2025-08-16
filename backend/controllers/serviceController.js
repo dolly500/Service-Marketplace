@@ -1,0 +1,341 @@
+import serviceModel from "../models/serviceModel.js";
+import categoryModel from "../models/categoryModel.js";
+import fs from 'fs';
+
+// Add service with category validation (Admin Route)
+const addService = async (req, res) => {
+    try {
+        // Check if file was uploaded
+        if (!req.file) {
+            return res.json({
+                success: false,
+                message: "Image is required"
+            });
+        }
+
+        let image_filename = req.file.filename;
+        
+        // Handle the trailing space in the 'name' field
+        const name = req.body.name || req.body['name '];
+        const description = req.body.description;
+        const price = req.body.price;
+        const category = req.body.category;
+       
+        
+        // Validate required fields
+        if (!name || !description || !price || !category) {
+            // Remove uploaded image if validation fails
+            fs.unlink(`uploads/${image_filename}`, () => {});
+            return res.json({
+                success: false,
+                message: "All fields are required"
+            });
+        }
+        
+        // Validate if category exists and is active
+        const categoryDoc = await categoryModel.findOne({ 
+            name: category, 
+            isActive: true 
+        });
+
+        if (!categoryDoc) {
+            // Remove uploaded image if category is invalid
+            fs.unlink(`uploads/${image_filename}`, () => {});
+            return res.json({
+                success: false,
+                message: "Invalid category selected"
+            });
+        }
+
+        const service = new serviceModel({
+            name: name.trim(),
+            description: description.trim(),
+            price: Number(price),
+            category: categoryDoc._id,
+            image: image_filename,
+        });
+
+        await service.save();
+        res.json({
+            success: true,
+            message: "Service added successfully",
+            data: service
+        });
+
+    } catch (error) {
+        console.log(error);
+        // Remove uploaded image if there's an error
+        if (req.file && req.file.filename) {
+            fs.unlink(`uploads/${req.file.filename}`, () => {});
+        }
+        res.json({
+            success: false,
+            message: "Error adding service"
+        });
+    }
+};
+
+// Get all services list (Public Route)
+const listService = async (req, res) => {
+    try {
+        const services = await serviceModel.find({ isActive: true })
+            .populate('category', 'name')
+            .sort({ createdAt: -1 });
+            
+        res.json({
+            success: true,
+            data: services
+        });
+    } catch (error) {
+        console.log(error);
+        res.json({
+            success: false,
+            message: "Error fetching services"
+        });
+    }
+};
+
+
+// Get all services (including inactive ones) - for admin panel
+const listAllServices = async (req, res) => {
+    try {
+        const services = await serviceModel.find({})
+            .populate('category', 'name')
+            .sort({ createdAt: -1 });
+            
+        res.json({
+            success: true,
+            data: services
+        });
+    } catch (error) {
+        console.log(error);
+        res.json({
+            success: false,
+            message: "Error fetching services"
+        });
+    }
+};
+
+// Get services by service provider (Public Route - for displaying provider's services)
+const getServicesByProvider = async (req, res) => {
+    try {
+        const { providerId } = req.params;
+        
+        const services = await serviceModel.find({ 
+            serviceProvider: providerId,
+            isActive: true 
+        }).populate('category', 'name');
+            
+        res.json({
+            success: true,
+            data: services
+        });
+    } catch (error) {
+        console.log(error);
+        res.json({
+            success: false,
+            message: "Error fetching services by provider"
+        });
+    }
+};
+
+// Get services by category (Public Route)
+const listServicesByCategory = async (req, res) => {
+    try {
+        const { category } = req.params;
+        
+        // Validate if category exists and is active
+        const categoryExists = await categoryModel.findOne({ 
+            name: category, 
+            isActive: true 
+        });
+
+        if (!categoryExists) {
+            return res.json({
+                success: false,
+                message: "Category not found"
+            });
+        }
+
+        const services = await serviceModel.find({ 
+            category: categoryExists._id,
+            isActive: true 
+        })
+            .populate('serviceProvider', 'name businessName phone email')
+            .populate('category', 'name');
+            
+        res.json({
+            success: true,
+            data: services
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.json({
+            success: false,
+            message: "Error fetching services by category"
+        });
+    }
+};
+
+// Update service (Admin Route)
+const updateService = async (req, res) => {
+    try {
+        const { id, name, description, price, category, isActive } = req.body;
+
+        // Check if service exists
+        const existingService = await serviceModel.findById(id);
+
+        if (!existingService) {
+            return res.json({
+                success: false,
+                message: "Service not found"
+            });
+        }
+
+        // If category is being updated, validate it exists and is active
+        if (category) {
+            const categoryExists = await categoryModel.findOne({ 
+                name: category, 
+                isActive: true 
+            });
+
+            if (!categoryExists) {
+                return res.json({
+                    success: false,
+                    message: "Invalid category selected"
+                });
+            }
+        }
+
+        const updateData = {
+            updatedAt: Date.now()
+        };
+
+        if (name) updateData.name = name.trim();
+        if (description) updateData.description = description.trim();
+        if (price) updateData.price = Number(price);
+        if (typeof isActive !== 'undefined') updateData.isActive = isActive;
+        
+        if (category) {
+            const categoryDoc = await categoryModel.findOne({ name: category, isActive: true });
+            updateData.category = categoryDoc._id;
+        }
+
+        // If new image is uploaded
+        if (req.file && req.file.filename) {
+            // Remove old image
+            if (existingService.image) {
+                fs.unlink(`uploads/${existingService.image}`, (err) => {
+                    if (err) console.log("Error deleting old image:", err);
+                });
+            }
+            updateData.image = req.file.filename;
+        }
+
+        const service = await serviceModel.findByIdAndUpdate(
+            id,
+            updateData,
+            { new: true }
+        )
+            .populate('category', 'name');
+
+        res.json({
+            success: true,
+            message: "Service updated successfully",
+            data: service
+        });
+
+    } catch (error) {
+        console.log(error);
+        if (req.file && req.file.filename) {
+            fs.unlink(`uploads/${req.file.filename}`, () => {});
+        }
+        res.json({
+            success: false,
+            message: "Error updating service"
+        });
+    }
+};
+
+// Delete service (Admin Route - soft delete)
+const deleteService = async (req, res) => {
+    try {
+        const { id } = req.body;
+
+        const service = await serviceModel.findByIdAndUpdate(
+            id,
+            { 
+                isActive: false,
+                updatedAt: Date.now()
+            },
+            { new: true }
+        );
+
+        if (!service) {
+            return res.json({
+                success: false,
+                message: "Service not found"
+            });
+        }
+
+        res.json({
+            success: true,
+            message: "Service deleted successfully"
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.json({
+            success: false,
+            message: "Error deleting service"
+        });
+    }
+};
+
+// Remove service (Admin Route - hard delete)
+const removeService = async (req, res) => {
+    try {
+        const { id } = req.body;
+        
+        const service = await serviceModel.findById(id);
+        
+        if (!service) {
+            return res.json({
+                success: false,
+                message: "Service not found"
+            });
+        }
+
+        // Remove image file
+        if (service.image) {
+            fs.unlink(`uploads/${service.image}`, (err) => {
+                if (err) console.log("Error deleting image:", err);
+            });
+        }
+
+        await serviceModel.findByIdAndDelete(id);
+        res.json({
+            success: true,
+            message: "Service permanently removed"
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.json({
+            success: false,
+            message: "Error removing service"
+        });
+    }
+};
+
+export {
+    addService,
+    listService,
+    listAllServices,
+    getServicesByProvider,
+    listServicesByCategory,
+    updateService,
+    deleteService,
+    removeService
+};

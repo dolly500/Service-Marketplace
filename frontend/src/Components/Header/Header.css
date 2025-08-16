@@ -1,0 +1,412 @@
+.header {
+  background: linear-gradient(135deg, #f8f9ff 0%, #e3e7ff 100%);
+  padding: 2rem 0;
+  min-height: 60vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 59%;
+  height: 100%;
+  background: url('https://app.truelysell.com/front/img/banner.webp');
+  border-radius: 0 0 0 200px;
+  z-index: 1;
+}
+
+.header-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  min-height: 600px;
+}
+
+/* Left Content Section */
+.header-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 100%;
+}
+
+.booking-status {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.status-indicator {
+  background: #10b981;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 50%;
+}
+
+.header-title {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.title-highlight {
+  color: #e91e63;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.header-subtitle {
+  font-size: 1.1rem;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.6;
+  max-width: 90%;
+}
+
+/* Search Section */
+.search-container {
+  margin: 2rem 0;
+}
+
+.search-box {
+  background: white;
+  border-radius: 12px;
+  padding: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.search-input-group,
+.location-input-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  padding: 0.5rem;
+}
+
+.search-icon,
+.location-icon {
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
+.search-input,
+.location-input {
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  color: #374151;
+  width: 100%;
+  background: transparent;
+}
+
+.search-input::placeholder,
+.location-input::placeholder {
+  color: #9ca3af;
+}
+
+.location-input-group {
+  border-left: 1px solid #e5e7eb;
+  margin-left: 0.5rem;
+}
+
+.search-btn {
+  background: linear-gradient(135deg, #e91e63 0%, #ad1457 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.search-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(233, 30, 99, 0.3);
+}
+
+/* Popular Searches */
+.popular-searches {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.popular-label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.9rem;
+}
+
+.search-tags {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.search-tag {
+  background: #f3f4f6;
+  color: #6b7280;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.search-tag:hover {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+/* Statistics */
+.stats-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.stat-icon {
+  color: #6b7280;
+  padding: 0.5rem;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.stat-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-number {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* Right Image Section */
+.header-image {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.rating-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: white;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 10;
+}
+
+.rating-star {
+  color: #fbbf24;
+}
+
+.rating-text {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+}
+
+.rating-reviews {
+  color: #6b7280;
+  font-weight: normal;
+}
+
+.professionals-image {
+  position: relative;
+  width: 300px;
+  height: 400px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+  border-radius: 20px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.professional {
+  position: absolute;
+  bottom: 0;
+}
+
+.professional.male {
+  left: 20px;
+  z-index: 2;
+}
+
+.professional.female {
+  right: 20px;
+  z-index: 1;
+}
+
+.professional-avatar {
+  font-size: 4rem;
+  line-height: 1;
+  margin-bottom: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .header-container {
+    gap: 2rem;
+    padding: 0 1.5rem;
+  }
+  
+  .professionals-image {
+    width: 250px;
+    height: 350px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    min-height: auto;
+    padding: 1.5rem 0;
+  }
+  
+  .header::before {
+    display: none;
+  }
+  
+  .header-container {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    min-height: auto;
+  }
+  
+  .search-box {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .search-input-group,
+  .location-input-group {
+    width: 100%;
+  }
+  
+  .location-input-group {
+    border-left: none;
+    border-top: 1px solid #e5e7eb;
+    margin-left: 0;
+    padding-top: 1rem;
+  }
+  
+  .search-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 1rem;
+  }
+  
+  
+  .stat-item {
+    min-width: 200px;
+  }
+  
+  .professionals-image {
+    width: 200px;
+    height: 250px;
+    margin: 0 auto;
+  }
+  
+  .rating-badge {
+    top: 0.5rem;
+    right: 0.5rem;
+    padding: 0.5rem 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-container {
+    padding: 0 1rem;
+  }
+  
+  .header-title {
+    font-size: 2.5rem;
+  }
+  
+  .popular-searches {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .stats-container {
+    flex-direction: column;
+  }
+  
+  .stat-item {
+    min-width: auto;
+  }
+  
+  .professionals-image {
+    width: 180px;
+    height: 220px;
+  }
+  
+  .professional-avatar {
+    font-size: 3rem;
+  }
+}
