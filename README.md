@@ -1,4 +1,4 @@
-# Servicity Application
+# Servicity Marketplace Application
 
 A service platform for home services.
 
@@ -155,3 +155,4 @@ The application consists of three main parts:
 
 
 Each part has its own package.json file with specific dependencies. 
+
