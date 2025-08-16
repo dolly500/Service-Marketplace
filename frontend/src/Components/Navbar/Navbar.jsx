@@ -32,16 +32,16 @@ const Navbar = () => {
           Home
         </Link>
         <a
+          href="/categories"
+          className={menu === "Services" ? "active" : ""}
+        >
+          Service Categories
+        </a>
+            <a
           href="/services"
           className={menu === "Services" ? "active" : ""}
         >
           Services
-        </a>
-        <a
-          href="/categories"
-          className={menu === "Services" ? "active" : ""}
-        >
-          Services Category
         </a>
         <a
           href=""
@@ -74,7 +74,15 @@ const Navbar = () => {
               </li>
               <li onClick={() => navigate('/my-orders')}>
                 <img src={assets.bag_icon} alt="" />
-                <p>My Bookings</p>
+                <p>All Bookings</p>
+              </li>
+              <li onClick={() => navigate('/my-orders')}>
+                <img src={assets.bag_icon} alt="" />
+                <p>Booking History</p>
+              </li>
+              <li onClick={() => navigate('/my-orders')}>
+                <img src={assets.bag_icon} alt="" />
+                <p>Notifications</p>
               </li>
               <hr />
               <li onClick={handleLogout}>

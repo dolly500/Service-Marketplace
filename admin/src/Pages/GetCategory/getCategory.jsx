@@ -68,7 +68,7 @@ const CategoriesTable = () => {
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <h2 style={styles.title}>Categories Management</h2>
+        <h2 style={styles.title}>Service Categories Management</h2>
         <div style={styles.stats}>
           Total Categories: <span style={styles.count}>{categories.length}</span>
         </div>

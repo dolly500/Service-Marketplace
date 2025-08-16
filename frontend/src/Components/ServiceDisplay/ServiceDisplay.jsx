@@ -1,45 +1,19 @@
 import { useContext } from "react";
 import { StoreContext } from "../context/storeContext";
 import PropTypes from "prop-types";
+import ServiceCard from "../../Components/ServiceCard"; 
 
 const ServiceDisplay = ({ category }) => {
   const { service_list, loading, error } = useContext(StoreContext);
 
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(price);
+  const handleServiceClick = (serviceId) => {
+    // Handle service click logic here
+    console.log('Service clicked:', serviceId);
   };
 
-  const ServiceItem = ({ id, name, description, price, image, category }) => {
-    return (
-      <div style={styles.serviceItem}>
-        <div style={styles.serviceItemImgContainer}>
-          <img 
-            style={styles.serviceItemImage}
-            src={image ? `http://localhost:4000/images/${image}` : '/api/placeholder/260/200'} 
-            alt={name}
-            onError={(e) => {
-              e.target.src = '/api/placeholder/260/200';
-            }}
-          />
-        </div>
-        <div style={styles.serviceItemInfo}>
-          <div style={styles.serviceItemNameRating}>
-            <p style={styles.serviceItemName}>{name}</p>
-            {category && (
-              <div style={styles.categoryBadge}>
-                {typeof category === 'object' ? category.name : category}
-              </div>
-            )}
-          </div>
-          <p style={styles.serviceItemDesc}>{description}</p>
-          <p style={styles.serviceItemPrice}>{formatPrice(price)}</p>
-          <button style={styles.bookButton}>Book Now</button>
-        </div>
-      </div>
-    );
+  const handleBookClick = (serviceId) => {
+    // Handle book click logic here
+    console.log('Book clicked for service:', serviceId);
   };
 
   if (loading) {
@@ -78,7 +52,7 @@ const ServiceDisplay = ({ category }) => {
         {service_list.map((item, index) => {
           if (category === "All" || category === item.category) {
             return (
-              <ServiceItem
+              <ServiceCard
                 key={item._id || index}
                 id={item._id}
                 name={item.name}
@@ -86,6 +60,8 @@ const ServiceDisplay = ({ category }) => {
                 price={item.price}
                 image={item.image}
                 category={item.category}
+                onServiceClick={handleServiceClick}
+                onBookClick={handleBookClick}
               />
             );
           }
@@ -113,75 +89,6 @@ const styles = {
     gap: '25px',
     rowGap: '40px',
     padding: '0 20px'
-  },
-  serviceItem: {
-    width: '100%',
-    margin: 'auto',
-    borderRadius: '15px',
-    boxShadow: '0 0 10px #00000015',
-    transition: 'transform 0.3s ease',
-    animation: 'fadeInUp 0.5s ease',
-    cursor: 'pointer',
-    backgroundColor: '#fff'
-  },
-  serviceItemImgContainer: {
-    position: 'relative'
-  },
-  serviceItemImage: {
-    width: '100%',
-    height: '200px',
-    objectFit: 'cover',
-    borderRadius: '15px 15px 0 0'
-  },
-  serviceItemInfo: {
-    padding: '20px'
-  },
-  serviceItemNameRating: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: '10px'
-  },
-  serviceItemName: {
-    fontSize: '20px',
-    fontWeight: '500',
-    color: '#333',
-    margin: '0',
-    flex: '1'
-  },
-  categoryBadge: {
-    backgroundColor: '#1a237e',
-    color: '#fff',
-    padding: '4px 12px',
-    borderRadius: '20px',
-    fontSize: '12px',
-    fontWeight: '500',
-    textTransform: 'capitalize',
-    marginLeft: '10px'
-  },
-  serviceItemDesc: {
-    fontSize: '12px',
-    color: '#676767',
-    margin: '0 0 15px 0',
-    lineHeight: '1.4'
-  },
-  serviceItemPrice: {
-    fontSize: '22px',
-    fontWeight: '500',
-    color: '#1a237e',
-    margin: '0 0 15px 0'
-  },
-  bookButton: {
-    backgroundColor: '#1a237e',
-    color: '#fff',
-    border: 'none',
-    padding: '10px 20px',
-    borderRadius: '5px',
-    fontSize: '14px',
-    fontWeight: '500',
-    cursor: 'pointer',
-    width: '100%',
-    transition: 'background-color 0.3s ease'
   },
   loadingContainer: {
     display: 'flex',
@@ -231,7 +138,7 @@ const styles = {
   }
 };
 
-// Add CSS animations (only add if not already present)
+// Add CSS animations for loading spinner
 if (!document.querySelector('#service-display-animations')) {
   const styleSheet = document.createElement('style');
   styleSheet.id = 'service-display-animations';
@@ -242,25 +149,6 @@ if (!document.querySelector('#service-display-animations')) {
       100% { transform: rotate(360deg); }
     }
     
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    
-    .service-item:hover {
-      transform: scale(1.05);
-    }
-    
-    .book-button:hover {
-      background-color: #303f9f !important;
-    }
-    
     .retry-btn:hover {
       background-color: #303f9f !important;
     }
@@ -268,7 +156,6 @@ if (!document.querySelector('#service-display-animations')) {
   document.head.appendChild(styleSheet);
 }
 
-// Define prop-types for validation
 ServiceDisplay.propTypes = {
   category: PropTypes.string.isRequired,
 };

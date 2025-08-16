@@ -75,16 +75,55 @@ const addService = async (req, res) => {
     }
 };
 
-// Get all services list (Public Route)
+// Get all services list with optional category filter (Public Route)
 const listService = async (req, res) => {
     try {
-        const services = await serviceModel.find({ isActive: true })
+        const { category, page = 1, limit = 10 } = req.query;
+        
+        // Build query object
+        let query = { isActive: true };
+        
+        // If category is provided, filter by category
+        if (category && category !== 'All') {
+            // Find category by name
+            const categoryDoc = await categoryModel.findOne({ 
+                name: category, 
+                isActive: true 
+            });
+
+            if (!categoryDoc) {
+                return res.json({
+                    success: false,
+                    message: "Category not found"
+                });
+            }
+
+            query.category = categoryDoc._id;
+        }
+        
+        // Calculate pagination
+        const skip = (page - 1) * limit;
+        
+        // Fetch services with pagination
+        const services = await serviceModel.find(query)
             .populate('category', 'name')
+            .skip(skip)
+            .limit(parseInt(limit))
             .sort({ createdAt: -1 });
+        
+        // Get total count for pagination
+        const totalServices = await serviceModel.countDocuments(query);
             
         res.json({
             success: true,
-            data: services
+            data: services,
+            pagination: {
+                currentPage: parseInt(page),
+                totalPages: Math.ceil(totalServices / limit),
+                totalServices,
+                hasNextPage: skip + services.length < totalServices,
+                hasPrevPage: page > 1
+            }
         });
     } catch (error) {
         console.log(error);
@@ -139,7 +178,7 @@ const getServicesByProvider = async (req, res) => {
     }
 };
 
-// Get services by category (Public Route)
+// Get services by category (Public Route) - Updated to remove service provider
 const listServicesByCategory = async (req, res) => {
     try {
         const { category } = req.params;
@@ -161,7 +200,6 @@ const listServicesByCategory = async (req, res) => {
             category: categoryExists._id,
             isActive: true 
         })
-            .populate('serviceProvider', 'name businessName phone email')
             .populate('category', 'name');
             
         res.json({

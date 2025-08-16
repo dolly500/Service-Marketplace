@@ -1,10 +1,12 @@
 import "./Category.css";
 import { useState, useEffect } from 'react';
+import { useNavigate } from "react-router-dom";
 
 function Category() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchCategories();
@@ -33,6 +35,11 @@ function Category() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCategoryClick = (categoryName) => {
+    // Navigate to the category services page
+    navigate(`/category/${categoryName}`);
   };
 
   const getImageUrl = (imageName) => {
@@ -103,6 +110,8 @@ function Category() {
               <div
                 key={category._id}
                 className="category-card"
+                onClick={() => handleCategoryClick(category.name)}
+                style={{ cursor: 'pointer' }}
               >
                 <div className="category-icon-wrapper">
                   <div className="category-icon">

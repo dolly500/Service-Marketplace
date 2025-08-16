@@ -1,7 +1,7 @@
 /* Category Component Styles */
 .explore-services {
-  padding: 4rem 2rem;
-  min-height: 100vh;
+  padding: 3rem 2rem;
+
 }
 
 .explore-services-header {
@@ -163,6 +163,7 @@
 .category-name {
   font-size: 1rem;
   font-weight: 600;
+  color: #64748b;
 }
 
 .category-description {

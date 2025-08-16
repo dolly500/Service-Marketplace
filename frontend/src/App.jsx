@@ -6,6 +6,7 @@ import AuthPage from "./Pages/Auth/AuthPage";
 import Profile from "./Pages/Profile/Profile";
 import Services from "./Pages/Services/Services";
 import Category from "./Pages/Category/Category";
+import CategoryServices from "./Components/CategoryService/CategoryService";
 
 const App = () => {
   return (
@@ -20,6 +21,7 @@ const App = () => {
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/services" element={<Services />} />
         <Route path="/categories" element={<Category />} />
+         <Route path="/category/:categoryName" element={<CategoryServices />} />
       </Routes>
 
       <Footer />

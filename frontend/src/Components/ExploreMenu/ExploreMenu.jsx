@@ -1,13 +1,17 @@
 import "./ExploreMenu.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import PropTypes from 'prop-types';
 
 const ExploreMenu = ({ category, setCategory }) => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  const navigate = useNavigate();
+  const categoriesContainerRef = useRef(null);
 
-  // Fetch categories from API
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -30,9 +34,53 @@ const ExploreMenu = ({ category, setCategory }) => {
     fetchCategories();
   }, []);
 
-  
+  // Check scroll position and update button visibility
+  const checkScrollButtons = () => {
+    if (categoriesContainerRef.current) {
+      const container = categoriesContainerRef.current;
+      setCanScrollLeft(container.scrollLeft > 0);
+      setCanScrollRight(
+        container.scrollLeft < container.scrollWidth - container.clientWidth
+      );
+    }
+  };
 
+  // Update scroll buttons when categories change
+  useEffect(() => {
+    if (categories.length > 0) {
+      setTimeout(checkScrollButtons, 100); // Small delay to ensure DOM is updated
+    }
+  }, [categories]);
 
+  const handleCategoryClick = (categoryName) => {
+    setCategory(categoryName);
+    navigate(`/category/${categoryName}`);
+  };
+
+  const scrollLeft = () => {
+    if (categoriesContainerRef.current) {
+      categoriesContainerRef.current.scrollBy({
+        left: -300,
+        behavior: 'smooth'
+      });
+      setTimeout(checkScrollButtons, 300); // Check after scroll animation
+    }
+  };
+
+  const scrollRight = () => {
+    if (categoriesContainerRef.current) {
+      categoriesContainerRef.current.scrollBy({
+        left: 300,
+        behavior: 'smooth'
+      });
+      setTimeout(checkScrollButtons, 300); // Check after scroll animation
+    }
+  };
+
+  // Handle scroll event to update button states
+  const handleScroll = () => {
+    checkScrollButtons();
+  };
 
   if (loading) {
     return (
@@ -75,67 +123,73 @@ const ExploreMenu = ({ category, setCategory }) => {
   return (
     <div className="explore-services" id="explore-services">
       <div className="explore-services-header">
-        <h1>Checkout our Recent <span className="highlight">Category</span></h1>
+        <h1>Checkout our Recent Service <span className="highlight">Category</span></h1>
         <p className="explore-services-subtitle">
           Service categories help organize and structure the offerings on a marketplace,
           <br />making it easier for users to find what they need.
         </p>
       </div>
       
-      <div className="categories-grid">
-        {categories.slice(0, 7).map((item) => {
-          const imageUrl = item.image 
-            ? `http://localhost:4000/images/${item.image}` 
-            : '';
-          
-          const description = item.description;
-          
-          return (
-            <div
-              onClick={() =>
-                setCategory((prev) =>
-                  prev === item.name ? "All" : item.name
-                )
-              }
-              key={item._id}
-              className={`category-card ${category === item.name ? "active-card" : ""}`}
-            >
-              <div className="category-icon-wrapper">
+      <div className="category-carousel">
+        <button 
+          className={`carousel-btn prev ${!canScrollLeft ? 'disabled' : ''}`}
+          onClick={scrollLeft}
+          disabled={!canScrollLeft}
+        >
+          &#8249;
+        </button>
+        
+        <div 
+          className="categories-container" 
+          ref={categoriesContainerRef}
+          onScroll={handleScroll}
+        >
+          {categories.map((item) => {
+            const imageUrl = item.image 
+              ? `http://localhost:4000/images/${item.image}` 
+              : '';
+            
+            return (
+              <div
+                onClick={() => handleCategoryClick(item.name)}
+                key={item._id}
+                className={`category-card ${category === item.name ? "active-card" : ""}`}
+              >
                 <div className="category-icon">
-                  <img
-                    src={imageUrl}
-                    alt={item.name}                
-                  />
+                  <img src={imageUrl} alt={item.name} />
+                </div>
+                <div className="category-info">
+                  <h3 className="category-name">{item.name}</h3>
+                  <p className="category-count">{item.serviceCount} Services</p>
                 </div>
               </div>
-              
-              <div className="category-info">
-                <h3 className="category-name">{item.name}</h3>
-                <p className="category-description">
-                  {description}
-                </p>
-                <strong>{item.serviceCount} services</strong>
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
+        
+        <button 
+          className={`carousel-btn next ${!canScrollRight ? 'disabled' : ''}`}
+          onClick={scrollRight}
+          disabled={!canScrollRight}
+        >
+          &#8250;
+        </button>
       </div>
       
       <div className="view-all-section">
-       <a href="/categories">
-         <button 
-          className="view-all-btn"
-          onClick={() => setCategory("All")}
-        >
-          View All <span className="arrow">→</span>
-        </button>
-       </a>
+        <a href="/categories">
+          <button 
+            className="view-all-btn"
+            onClick={() => setCategory("All")}
+          >
+            View All <span className="arrow">→</span>
+          </button>
+        </a>
       </div>
     </div>
   );
 };
 
-// Define PropTypes for the component
 ExploreMenu.propTypes = {
   category: PropTypes.string.isRequired,
   setCategory: PropTypes.func.isRequired,
