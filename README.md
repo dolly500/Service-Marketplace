@@ -1,4 +1,4 @@
-# Homease Application
+# Servicity Application
 
 A service platform for home services.
 
@@ -152,5 +152,6 @@ The application consists of three main parts:
 1. Frontend (React)
 2. Backend (Node.js/Express)
 3. Admin Panel (React)
+
 
 Each part has its own package.json file with specific dependencies. 
