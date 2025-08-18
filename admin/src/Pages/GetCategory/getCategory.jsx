@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Edit2, X, Save, Upload } from 'lucide-react';
+import { Edit2, X, Save, Upload, Trash2 } from 'lucide-react';
 
 const CategoriesTable = () => {
   const [categories, setCategories] = useState([]);
@@ -8,6 +8,8 @@ const CategoriesTable = () => {
   const [editModal, setEditModal] = useState({ isOpen: false, category: null });
   const [editLoading, setEditLoading] = useState(false);
   const [editError, setEditError] = useState(null);
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, category: null });
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     fetchCategories();
@@ -104,6 +106,51 @@ const CategoriesTable = () => {
       setEditError('Error updating category: ' + err.message);
     } finally {
       setEditLoading(false);
+    }
+  };
+
+  const handleDelete = (category) => {
+    setDeleteModal({
+      isOpen: true,
+      category: category
+    });
+  };
+
+  const handleCloseDeleteModal = () => {
+    setDeleteModal({ isOpen: false, category: null });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteModal.category) return;
+
+    try {
+      setDeleteLoading(true);
+
+      const response = await fetch('http://localhost:4000/api/category/remove', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: deleteModal.category._id
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Remove the category from the local state
+        setCategories(prev => prev.filter(category => 
+          category._id !== deleteModal.category._id
+        ));
+        handleCloseDeleteModal();
+      } else {
+        setError(result.message || 'Failed to delete category');
+      }
+    } catch (err) {
+      setError('Error deleting category: ' + err.message);
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -213,13 +260,22 @@ const CategoriesTable = () => {
                   <span style={styles.date}>{formatDate(category.updatedAt)}</span>
                 </td>
                 <td style={styles.td}>
-                  <button 
-                    onClick={() => handleEdit(category)}
-                    style={styles.editButton}
-                    title="Edit Category"
-                  >
-                    <Edit2 size={16} />
-                  </button>
+                  <div style={styles.actionsContainer}>
+                    <button 
+                      onClick={() => handleEdit(category)}
+                      style={styles.editButton}
+                      title="Edit Category"
+                    >
+                      <Edit2 size={16} />
+                    </button>
+                    <button 
+                      onClick={() => handleDelete(category)}
+                      style={styles.deleteButton}
+                      title="Delete Category"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -338,6 +394,50 @@ const CategoriesTable = () => {
                     Update Category
                   </>
                 )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteModal.isOpen && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.deleteModalContainer}>
+            <div style={styles.deleteModalHeader}>
+              <h3 style={styles.deleteModalTitle}>Delete Category</h3>
+              <button 
+                onClick={handleCloseDeleteModal}
+                style={styles.closeButton}
+                disabled={deleteLoading}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div style={styles.deleteModalBody}>
+              <div style={styles.deleteWarning}>
+                <Trash2 size={48} style={styles.deleteIcon} />
+                <p style={styles.deleteMessage}>
+                  Are you sure you want to delete the category <strong>"{deleteModal.category?.name}"</strong>?
+                </p>
+              </div>
+            </div>
+
+            <div style={styles.deleteModalFooter}>
+              <button 
+                onClick={handleCloseDeleteModal}
+                style={styles.cancelButton}
+                disabled={deleteLoading}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleConfirmDelete}
+                style={styles.deleteConfirmButton}
+                disabled={deleteLoading}
+              >
+                {deleteLoading ? 'Deleting...' : 'Delete Category'}
               </button>
             </div>
           </div>
@@ -476,8 +576,25 @@ const styles = {
     fontSize: '13px',
     whiteSpace: 'nowrap'
   },
+  actionsContainer: {
+    display: 'flex',
+    gap: '8px',
+    alignItems: 'center'
+  },
   editButton: {
     backgroundColor: '#3b82f6',
+    color: 'white',
+    border: 'none',
+    borderRadius: '6px',
+    padding: '8px',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'background-color 0.2s ease'
+  },
+  deleteButton: {
+    backgroundColor: '#ef4444',
     color: 'white',
     border: 'none',
     borderRadius: '6px',
@@ -695,6 +812,70 @@ const styles = {
     fontWeight: '500',
     cursor: 'pointer',
     transition: 'background-color 0.2s ease'
+  },
+  // Delete modal styles
+  deleteModalContainer: {
+    backgroundColor: 'white',
+    borderRadius: '12px',
+    width: '100%',
+    maxWidth: '450px',
+    overflow: 'hidden',
+    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+  },
+  deleteModalHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '20px 24px',
+    borderBottom: '1px solid #e5e7eb',
+    backgroundColor: '#fef2f2'
+  },
+  deleteModalTitle: {
+    fontSize: '20px',
+    fontWeight: '600',
+    color: '#991b1b',
+    margin: 0
+  },
+  deleteModalBody: {
+    padding: '24px'
+  },
+  deleteWarning: {
+    textAlign: 'center'
+  },
+  deleteIcon: {
+    color: '#ef4444',
+    marginBottom: '16px'
+  },
+  deleteMessage: {
+    fontSize: '16px',
+    color: '#374151',
+    marginBottom: '12px',
+    lineHeight: '1.5'
+  },
+  deleteSubMessage: {
+    fontSize: '14px',
+    color: '#6b7280',
+    lineHeight: '1.5',
+    margin: 0
+  },
+  deleteModalFooter: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: '12px',
+    padding: '20px 24px',
+    borderTop: '1px solid #e5e7eb',
+    backgroundColor: '#f9fafb'
+  },
+  deleteConfirmButton: {
+    padding: '10px 20px',
+    backgroundColor: '#ef4444',
+    color: 'white',
+    border: 'none',
+    borderRadius: '6px',
+    fontSize: '14px',
+    fontWeight: '500',
+    cursor: 'pointer',
+    transition: 'background-color 0.2s ease'
   }
 };
 
@@ -707,6 +888,10 @@ styleSheet.textContent = `
   
   .edit-button:hover {
     background-color: #2563eb !important;
+  }
+  
+  .delete-button:hover {
+    background-color: #dc2626 !important;
   }
   
   .retry-button:hover {
@@ -727,6 +912,10 @@ styleSheet.textContent = `
   
   .save-button:hover {
     background-color: #047857 !important;
+  }
+  
+  .delete-confirm-button:hover {
+    background-color: #dc2626 !important;
   }
   
   input:focus, textarea:focus {

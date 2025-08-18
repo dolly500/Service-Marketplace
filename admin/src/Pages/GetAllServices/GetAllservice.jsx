@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Edit2, X, Save, Upload } from 'lucide-react';
+import { Edit2, X, Save, Upload, Trash2 } from 'lucide-react';
 
 const ServicesTable = () => {
   const [services, setServices] = useState([]);
@@ -9,6 +9,9 @@ const ServicesTable = () => {
   const [editModal, setEditModal] = useState({ isOpen: false, service: null });
   const [editLoading, setEditLoading] = useState(false);
   const [editError, setEditError] = useState(null);
+  // NEW: Add delete confirmation modal state
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, service: null });
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     fetchServices();
@@ -60,6 +63,50 @@ const ServicesTable = () => {
   const handleCloseModal = () => {
     setEditModal({ isOpen: false, service: null });
     setEditError(null);
+  };
+
+  // NEW: Add delete handlers
+  const handleDelete = (service) => {
+    setDeleteModal({
+      isOpen: true,
+      service: service
+    });
+  };
+
+  const handleCloseDeleteModal = () => {
+    setDeleteModal({ isOpen: false, service: null });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteModal.service) return;
+
+    try {
+      setDeleteLoading(true);
+
+      const response = await fetch('http://localhost:4000/api/service/remove', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: deleteModal.service._id
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Remove the service from local state
+        setServices(prev => prev.filter(service => service._id !== deleteModal.service._id));
+        handleCloseDeleteModal();
+      } else {
+        setError(result.message || 'Failed to delete service');
+      }
+    } catch (err) {
+      setError('Error deleting service: ' + err.message);
+    } finally {
+      setDeleteLoading(false);
+    }
   };
 
   const handleInputChange = (field, value) => {
@@ -254,13 +301,23 @@ const ServicesTable = () => {
                   <span style={styles.date}>{formatDate(service.updatedAt)}</span>
                 </td>
                 <td style={styles.td}>
-                  <button 
-                    onClick={() => handleEdit(service)}
-                    style={styles.editButton}
-                    title="Edit Service"
-                  >
-                    <Edit2 size={16} />
-                  </button>
+                  {/* MODIFIED: Add both edit and delete buttons */}
+                  <div style={styles.actionButtons}>
+                    <button 
+                      onClick={() => handleEdit(service)}
+                      style={styles.editButton}
+                      title="Edit Service"
+                    >
+                      <Edit2 size={16} />
+                    </button>
+                    <button 
+                      onClick={() => handleDelete(service)}
+                      style={styles.deleteButton}
+                      title="Delete Service"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -405,6 +462,53 @@ const ServicesTable = () => {
                     Update Service
                   </>
                 )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* NEW: Delete Confirmation Modal */}
+      {deleteModal.isOpen && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.deleteModalContainer}>
+            <div style={styles.deleteModalHeader}>
+              <h3 style={styles.deleteModalTitle}>Delete Service</h3>
+              <button 
+                onClick={handleCloseDeleteModal}
+                style={styles.closeButton}
+                disabled={deleteLoading}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div style={styles.deleteModalBody}>
+              <div style={styles.warningIcon}>
+                <Trash2 size={48} color="#dc2626" />
+              </div>
+              <p style={styles.deleteMessage}>
+                Are you sure you want to delete the service <strong>"{deleteModal.service?.name}"</strong>?
+              </p>
+              <p style={styles.deleteWarning}>
+                This action cannot be undone.
+              </p>
+            </div>
+
+            <div style={styles.deleteModalFooter}>
+              <button 
+                onClick={handleCloseDeleteModal}
+                style={styles.cancelButton}
+                disabled={deleteLoading}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleConfirmDelete}
+                style={styles.deleteConfirmButton}
+                disabled={deleteLoading}
+              >
+                {deleteLoading ? 'Deleting...' : 'Delete Service'}
               </button>
             </div>
           </div>
@@ -562,8 +666,27 @@ const styles = {
     fontSize: '13px',
     whiteSpace: 'nowrap'
   },
+  // NEW: Action buttons container
+  actionButtons: {
+    display: 'flex',
+    gap: '8px',
+    alignItems: 'center'
+  },
   editButton: {
     backgroundColor: '#3b82f6',
+    color: 'white',
+    border: 'none',
+    borderRadius: '6px',
+    padding: '8px',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'background-color 0.2s ease'
+  },
+  // NEW: Delete button style
+  deleteButton: {
+    backgroundColor: '#dc2626',
     color: 'white',
     border: 'none',
     borderRadius: '6px',
@@ -784,6 +907,68 @@ const styles = {
     fontWeight: '500',
     cursor: 'pointer',
     transition: 'background-color 0.2s ease'
+  },
+  // NEW: Delete modal styles
+  deleteModalContainer: {
+    backgroundColor: 'white',
+    borderRadius: '12px',
+    width: '100%',
+    maxWidth: '500px',
+    overflow: 'hidden',
+    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+  },
+  deleteModalHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '20px 24px',
+    borderBottom: '1px solid #e5e7eb',
+    backgroundColor: '#fef2f2'
+  },
+  deleteModalTitle: {
+    fontSize: '20px',
+    fontWeight: '600',
+    color: '#dc2626',
+    margin: 0
+  },
+  deleteModalBody: {
+    padding: '24px',
+    textAlign: 'center'
+  },
+  warningIcon: {
+    display: 'flex',
+    justifyContent: 'center',
+    marginBottom: '16px'
+  },
+  deleteMessage: {
+    fontSize: '16px',
+    color: '#374151',
+    marginBottom: '8px',
+    lineHeight: '1.5'
+  },
+  deleteWarning: {
+    fontSize: '14px',
+    color: '#6b7280',
+    fontStyle: 'italic'
+  },
+  deleteModalFooter: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: '12px',
+    padding: '20px 24px',
+    borderTop: '1px solid #e5e7eb',
+    backgroundColor: '#f9fafb'
+  },
+  deleteConfirmButton: {
+    padding: '10px 20px',
+    backgroundColor: '#dc2626',
+    color: 'white',
+    border: 'none',
+    borderRadius: '6px',
+    fontSize: '14px',
+    fontWeight: '500',
+    cursor: 'pointer',
+    transition: 'background-color 0.2s ease'
   }
 };
 
@@ -796,6 +981,10 @@ styleSheet.textContent = `
   
   .edit-button:hover {
     background-color: #2563eb !important;
+  }
+  
+  .delete-button:hover {
+    background-color: #b91c1c !important;
   }
   
   .retry-button:hover {
@@ -816,6 +1005,10 @@ styleSheet.textContent = `
   
   .save-button:hover {
     background-color: #047857 !important;
+  }
+  
+  .delete-confirm-button:hover {
+    background-color: #b91c1c !important;
   }
   
   input:focus, textarea:focus, select:focus {

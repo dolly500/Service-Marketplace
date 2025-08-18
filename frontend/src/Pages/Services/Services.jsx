@@ -1,10 +1,15 @@
 import { useState, useEffect } from 'react';
 import ServiceCard from '../../Components/ServiceCard';
+import ServiceDetailModal from '../../Pages/ServiceDetailModal/ServiceModal';
 
 function Services() {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedServiceId, setSelectedServiceId] = useState(null);
 
   useEffect(() => {
     fetchServices();
@@ -43,13 +48,22 @@ function Services() {
   };
 
   const handleServiceClick = (serviceId) => {
-    // Handle service click logic here
-    console.log('Service clicked:', serviceId);
+    // Open modal with service details
+    setSelectedServiceId(serviceId);
+    setIsModalOpen(true);
   };
 
   const handleBookClick = (serviceId) => {
     // Handle book click logic here
     console.log('Book clicked for service:', serviceId);
+    // You can also open the modal first and then handle booking
+    setSelectedServiceId(serviceId);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedServiceId(null);
   };
 
   if (loading) {
@@ -79,24 +93,33 @@ function Services() {
   }
 
   return (
-    <div style={styles.serviceDisplay}>
-      <h2 style={styles.title}>CheckOut for All services</h2>
-      <div style={styles.serviceDisplayList}>
-        {services.map((service) => (
-          <ServiceCard
-            key={service._id}
-            id={service._id}
-            name={service.name}
-            description={service.description}
-            price={service.price}
-            image={service.image}
-            category={service.category}
-            onServiceClick={handleServiceClick}
-            onBookClick={handleBookClick}
-          />
-        ))}
+    <>
+      <div style={styles.serviceDisplay}>
+        <h2 style={styles.title}>CheckOut for All services</h2>
+        <div style={styles.serviceDisplayList}>
+          {services.map((service) => (
+            <ServiceCard
+              key={service._id}
+              id={service._id}
+              name={service.name}
+              description={service.description}
+              price={service.price}
+              image={service.image}
+              category={service.category}
+              onServiceClick={handleServiceClick}
+              onBookClick={handleBookClick}
+            />
+          ))}
+        </div>
       </div>
-    </div>
+
+      {/* Service Detail Modal */}
+      <ServiceDetailModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        serviceId={selectedServiceId}
+      />
+    </>
   );
 }
 

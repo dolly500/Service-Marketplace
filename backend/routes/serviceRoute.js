@@ -8,7 +8,8 @@ import {
     listServicesByCategory, 
     updateService,
     deleteService,
-    removeService 
+    removeService,
+    getServiceDetail 
 } from '../controllers/serviceController.js';
 import authMiddleware from '../middleware/authMiddleware.js';
 
@@ -27,13 +28,14 @@ const upload = multer({ storage: storage });
 // Admin routes (require authentication - assuming authMiddleware validates admin)
 serviceRouter.post("/add", upload.single("image"), addService);
 serviceRouter.put("/update", upload.single("image"), updateService);
-serviceRouter.post("/delete", deleteService); // Soft delete
-serviceRouter.post("/remove", removeService); // Hard delete
-serviceRouter.get("/all", listAllServices); // Admin view - all services
+serviceRouter.post("/delete", deleteService); 
+serviceRouter.post("/remove", removeService); 
+serviceRouter.get("/all", listAllServices); 
 
 // Public routes (no authentication required)
-serviceRouter.get("/list", listService); // Active services only
+serviceRouter.get("/list", listService);
+serviceRouter.get("/detail/:id", getServiceDetail); 
 serviceRouter.get("/category/:category", listServicesByCategory);
-serviceRouter.get("/provider/:providerId", getServicesByProvider); // Services by specific provider
+serviceRouter.get("/provider/:providerId", getServicesByProvider);
 
 export default serviceRouter;

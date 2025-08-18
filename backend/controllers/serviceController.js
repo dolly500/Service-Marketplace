@@ -331,6 +331,45 @@ const deleteService = async (req, res) => {
     }
 };
 
+const getServiceDetail = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Validate if ID is provided
+        if (!id) {
+            return res.json({
+                success: false,
+                message: "Service ID is required"
+            });
+        }
+
+        // Find service by ID and populate category
+        const service = await serviceModel.findOne({ 
+            _id: id, 
+            isActive: true 
+        }).populate('category', 'name');
+
+        if (!service) {
+            return res.json({
+                success: false,
+                message: "Service not found or inactive"
+            });
+        }
+
+        res.json({
+            success: true,
+            data: service
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.json({
+            success: false,
+            message: "Error fetching service details"
+        });
+    }
+};
+
 // Remove service (Admin Route - hard delete)
 const removeService = async (req, res) => {
     try {
@@ -375,5 +414,6 @@ export {
     listServicesByCategory,
     updateService,
     deleteService,
+    getServiceDetail,
     removeService
 };

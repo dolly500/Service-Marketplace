@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ServiceCard from '../../Components/ServiceCard'; 
+import ServiceDetailModal from '../../Pages/ServiceDetailModal/ServiceModal'; 
 
 const CategoryServices = () => {
   const { categoryName } = useParams();
@@ -9,6 +10,10 @@ const CategoryServices = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [categoryInfo, setCategoryInfo] = useState(null);
+  
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedServiceId, setSelectedServiceId] = useState(null);
 
   useEffect(() => {
     const fetchCategoryServices = async () => {
@@ -44,15 +49,20 @@ const CategoryServices = () => {
   };
 
   const handleServiceClick = (serviceId) => {
-    // Handle service click logic here
-    console.log('Service clicked:', serviceId);
-    // You can navigate to service detail page here
-    // navigate(`/service/${serviceId}`);
+    // Open modal with service details
+    setSelectedServiceId(serviceId);
+    setIsModalOpen(true);
   };
 
   const handleBookClick = (serviceId) => {
-    // Handle book click logic here
-    console.log('Book clicked for service:', serviceId);
+    // Open modal with service details (you can customize this behavior)
+    setSelectedServiceId(serviceId);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedServiceId(null);
   };
 
   if (loading) {
@@ -107,46 +117,55 @@ const CategoryServices = () => {
   }
 
   return (
-    <div style={styles.categoryServicesPage}>
-      <div style={styles.pageHeader}>
-        <button onClick={handleBackClick} style={styles.backButton}>
-          ← Back
-        </button>
-        <div style={styles.categoryHeader}>
-          <h1 style={styles.categoryTitle}>
-            {categoryInfo?.name || categoryName} Services
-          </h1>
-          <p style={styles.servicesCount}>
-            {services.length} service{services.length !== 1 ? 's' : ''} available
-          </p>
+    <>
+      <div style={styles.categoryServicesPage}>
+        <div style={styles.pageHeader}>
+          <button onClick={handleBackClick} style={styles.backButton}>
+            ← Back
+          </button>
+          <div style={styles.categoryHeader}>
+            <h1 style={styles.categoryTitle}>
+              {categoryInfo?.name || categoryName} Services
+            </h1>
+            <p style={styles.servicesCount}>
+              {services.length} service{services.length !== 1 ? 's' : ''} available
+            </p>
+          </div>
         </div>
+
+        {services.length === 0 ? (
+          <div style={styles.noServices}>
+            <h3 style={styles.noServicesTitle}>No services available in this category</h3>
+            <p style={styles.noServicesText}>Check back later for new services!</p>
+          </div>
+        ) : (
+          <div style={styles.serviceDisplayList}>
+            {services.map((service) => (
+              <ServiceCard
+                key={service._id}
+                id={service._id}
+                name={service.name}
+                description={service.description}
+                price={service.price}
+                image={service.image}
+                category={service.category}
+                isActive={service.isActive}
+                showActiveBadge={true}
+                onServiceClick={handleServiceClick}
+                onBookClick={handleBookClick}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
-      {services.length === 0 ? (
-        <div style={styles.noServices}>
-          <h3 style={styles.noServicesTitle}>No services available in this category</h3>
-          <p style={styles.noServicesText}>Check back later for new services!</p>
-        </div>
-      ) : (
-        <div style={styles.serviceDisplayList}>
-          {services.map((service) => (
-            <ServiceCard
-              key={service._id}
-              id={service._id}
-              name={service.name}
-              description={service.description}
-              price={service.price}
-              image={service.image}
-              category={service.category}
-              isActive={service.isActive}
-              showActiveBadge={true}
-              onServiceClick={handleServiceClick}
-              onBookClick={handleBookClick}
-            />
-          ))}
-        </div>
-      )}
-    </div>
+      {/* Service Detail Modal */}
+      <ServiceDetailModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        serviceId={selectedServiceId}
+      />
+    </>
   );
 };
 

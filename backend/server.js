@@ -20,6 +20,7 @@ app.use(
     origin: "*", 
   })
 );
+app.set("json spaces", 2);
 
 //db connection
 let dbConnection = null;

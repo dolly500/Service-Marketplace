@@ -1,19 +1,31 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { StoreContext } from "../context/storeContext";
 import PropTypes from "prop-types";
-import ServiceCard from "../../Components/ServiceCard"; 
+import ServiceCard from "../../Components/ServiceCard";
+import ServiceDetailModal from "../../Pages/ServiceDetailModal/ServiceModal"; 
 
 const ServiceDisplay = ({ category }) => {
   const { service_list, loading, error } = useContext(StoreContext);
+  
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedServiceId, setSelectedServiceId] = useState(null);
 
   const handleServiceClick = (serviceId) => {
-    // Handle service click logic here
-    console.log('Service clicked:', serviceId);
+    // Open modal with service details
+    setSelectedServiceId(serviceId);
+    setIsModalOpen(true);
   };
 
   const handleBookClick = (serviceId) => {
-    // Handle book click logic here
-    console.log('Book clicked for service:', serviceId);
+    // Open modal with service details (you can customize this behavior)
+    setSelectedServiceId(serviceId);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedServiceId(null);
   };
 
   if (loading) {
@@ -46,28 +58,37 @@ const ServiceDisplay = ({ category }) => {
   }
 
   return (
-    <div style={styles.serviceDisplay} id="service-display">
-      <h2 style={styles.title}>Top services near you!</h2>
-      <div style={styles.serviceDisplayList}>
-        {service_list.map((item, index) => {
-          if (category === "All" || category === item.category) {
-            return (
-              <ServiceCard
-                key={item._id || index}
-                id={item._id}
-                name={item.name}
-                description={item.description}
-                price={item.price}
-                image={item.image}
-                category={item.category}
-                onServiceClick={handleServiceClick}
-                onBookClick={handleBookClick}
-              />
-            );
-          }
-        })}
+    <>
+      <div style={styles.serviceDisplay} id="service-display">
+        <h2 style={styles.title}>Top services near you!</h2>
+        <div style={styles.serviceDisplayList}>
+          {service_list.map((item, index) => {
+            if (category === "All" || category === item.category) {
+              return (
+                <ServiceCard
+                  key={item._id || index}
+                  id={item._id}
+                  name={item.name}
+                  description={item.description}
+                  price={item.price}
+                  image={item.image}
+                  category={item.category}
+                  onServiceClick={handleServiceClick}
+                  onBookClick={handleBookClick}
+                />
+              );
+            }
+          })}
+        </div>
       </div>
-    </div>
+
+      {/* Service Detail Modal */}
+      <ServiceDetailModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        serviceId={selectedServiceId}
+      />
+    </>
   );
 };
 
