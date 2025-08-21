@@ -21,7 +21,7 @@ const Navbar = () => {
   return (
     <div className="navbar" style={{padding:'0, 100px'}}>
       <Link to="/">
-        <img src={assets.logo} alt="" className="logo" />
+        <img src={assets.logo} alt="" className="logo" height="90vh"/>
       </Link>
       <ul className="navbar-menu">
         <Link

@@ -110,21 +110,6 @@ const ServiceDetailModal = ({ isOpen, onClose, serviceId }) => {
                 </span>
               </div>
 
-              <div style={styles.serviceDates}>
-                <div style={styles.dateItem}>
-                  <span style={styles.dateLabel}>Created:</span>
-                  <span style={styles.dateValue}>
-                    {new Date(serviceDetail.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-                <div style={styles.dateItem}>
-                  <span style={styles.dateLabel}>Updated:</span>
-                  <span style={styles.dateValue}>
-                    {new Date(serviceDetail.updatedAt).toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
-
               <div style={styles.modalActions}>
                 <button 
                   style={{

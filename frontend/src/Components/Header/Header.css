@@ -410,3 +410,27 @@
     font-size: 3rem;
   }
 }
+
+.suggestions-dropdown {
+  position: absolute;
+  top: 50.35%;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  margin-top: 5px;
+  margin-left: -20px;
+  z-index: 1000;
+  list-style: none;
+  padding: 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.suggestion-item {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.suggestion-item:hover {
+  background: #f5f5f5;
+}

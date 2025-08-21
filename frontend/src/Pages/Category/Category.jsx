@@ -91,7 +91,7 @@ function Category() {
         <h1>Checkout our Service <span className="highlight">Categories</span></h1>
         <p className="explore-services-subtitle">
           Service categories help organize and structure the offerings on a marketplace,
-          <br />making it easier for users to find what you need.
+          making it easier for users to find what you need.
         </p>
       </div>
 

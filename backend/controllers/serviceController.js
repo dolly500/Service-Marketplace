@@ -17,20 +17,23 @@ const addService = async (req, res) => {
         
         // Handle the trailing space in the 'name' field
         const name = req.body.name || req.body['name '];
-        const description = req.body.description;
-        const price = req.body.price;
-        const category = req.body.category;
+    const description = req.body.description;
+    const price = req.body.price;
+    const category = req.body.category;
+    const city = req.body.city;
+    const country = req.body.country;
+    const latitude = req.body.latitude;
+    const longitude = req.body.longitude;
        
         
         // Validate required fields
-        if (!name || !description || !price || !category) {
-            // Remove uploaded image if validation fails
-            fs.unlink(`uploads/${image_filename}`, () => {});
-            return res.json({
-                success: false,
-                message: "All fields are required"
-            });
-        }
+      if (!name || !description || !price || !category || !city || !country) {
+      fs.unlink(`uploads/${image_filename}`, () => {});
+      return res.json({
+        success: false,
+        message: "All fields (name, description, price, category, city, country) are required"
+      });
+    }
         
         // Validate if category exists and is active
         const categoryDoc = await categoryModel.findOne({ 
@@ -47,13 +50,21 @@ const addService = async (req, res) => {
             });
         }
 
-        const service = new serviceModel({
-            name: name.trim(),
-            description: description.trim(),
-            price: Number(price),
-            category: categoryDoc._id,
-            image: image_filename,
-        });
+      const service = new serviceModel({
+      name: name.trim(),
+      description: description.trim(),
+      price: Number(price),
+      category: categoryDoc._id,
+      image: image_filename,
+      location: {
+        city: city.trim(),
+        country: country.trim(),
+        coordinates: {
+          latitude: latitude ? Number(latitude) : undefined,
+          longitude: longitude ? Number(longitude) : undefined
+        }
+      }
+    });
 
         await service.save();
         res.json({
@@ -159,12 +170,19 @@ const listAllServices = async (req, res) => {
 const getServicesByProvider = async (req, res) => {
     try {
         const { providerId } = req.params;
-        
+
         const services = await serviceModel.find({ 
             serviceProvider: providerId,
             isActive: true 
         }).populate('category', 'name');
-            
+
+        if (!services.length) {
+            return res.json({
+                success: false,
+                message: "No services found for this provider"
+            });
+        }
+
         res.json({
             success: true,
             data: services
@@ -177,6 +195,7 @@ const getServicesByProvider = async (req, res) => {
         });
     }
 };
+
 
 // Get services by category (Public Route) - Updated to remove service provider
 const listServicesByCategory = async (req, res) => {
@@ -406,6 +425,107 @@ const removeService = async (req, res) => {
     }
 };
 
+// Global search for services by location and other filters (Public Route)
+const searchServices = async (req, res) => {
+    try {
+        const { 
+            query, 
+            category, 
+            city, 
+            country, 
+            minPrice, 
+            maxPrice, 
+            latitude, 
+            longitude, 
+            radius, 
+            page = 1, 
+            limit = 10 
+        } = req.query;
+
+        let searchQuery = { isActive: true };
+
+        // Text search for service name or description
+        if (query) {
+            searchQuery.$or = [
+                { name: { $regex: query, $options: 'i' } },
+                { description: { $regex: query, $options: 'i' } }
+            ];
+        }
+
+        // Filter by category
+        if (category && category !== 'All') {
+            const categoryDoc = await categoryModel.findOne({ 
+                name: category, 
+                isActive: true 
+            });
+            if (categoryDoc) {
+                searchQuery.category = categoryDoc._id;
+            } else {
+                return res.json({
+                    success: false,
+                    message: "Category not found"
+                });
+            }
+        }
+
+        // Filter by location (city and/or country)
+        if (city) {
+            searchQuery['location.city'] = { $regex: city, $options: 'i' };
+        }
+        if (country) {
+            searchQuery['location.country'] = { $regex: country, $options: 'i' };
+        }
+
+        // Filter by price range
+        if (minPrice || maxPrice) {
+            searchQuery.price = {};
+            if (minPrice) searchQuery.price.$gte = Number(minPrice);
+            if (maxPrice) searchQuery.price.$lte = Number(maxPrice);
+        }
+
+        // Geospatial search if coordinates and radius are provided
+        if (latitude && longitude && radius) {
+            searchQuery['location.coordinates'] = {
+                $near: {
+                    $geometry: {
+                        type: "Point",
+                        coordinates: [Number(longitude), Number(latitude)]
+                    },
+                    $maxDistance: Number(radius) * 1000 // Convert km to meters
+                }
+            };
+        }
+
+        const skip = (page - 1) * limit;
+        
+        const services = await serviceModel.find(searchQuery)
+            .populate('category', 'name')
+            .skip(skip)
+            .limit(parseInt(limit))
+            .sort({ createdAt: -1 });
+
+        const totalServices = await serviceModel.countDocuments(searchQuery);
+
+        res.json({
+            success: true,
+            data: services,
+            pagination: {
+                currentPage: parseInt(page),
+                totalPages: Math.ceil(totalServices / limit),
+                totalServices,
+                hasNextPage: skip + services.length < totalServices,
+                hasPrevPage: page > 1
+            }
+        });
+    } catch (error) {
+        console.log(error);
+        res.json({
+            success: false,
+            message: "Error searching services"
+        });
+    }
+};
+
 export {
     addService,
     listService,
@@ -415,5 +535,6 @@ export {
     updateService,
     deleteService,
     getServiceDetail,
-    removeService
+    removeService,
+    searchServices
 };

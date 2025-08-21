@@ -8,7 +8,9 @@ const AddService = () => {
     price: '',
     image: null,
     category: '',
-    isActive: true
+    city: '',
+    country: '',
+    isActive: true,
   });
 
   const [categories, setCategories] = useState([]);
@@ -25,7 +27,7 @@ const AddService = () => {
     try {
       const response = await fetch('http://localhost:4000/api/category/list');
       const data = await response.json();
-      
+
       if (data.success) {
         setCategories(data.data);
       } else {
@@ -53,7 +55,7 @@ const AddService = () => {
         image: file
       }));
 
-      // Create preview
+      // Preview
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result);
@@ -68,7 +70,7 @@ const AddService = () => {
     setMessage({ text: '', type: '' });
 
     // Validation
-    if (!formData.name || !formData.description || !formData.price || !formData.category || !formData.image) {
+    if (!formData.name || !formData.description || !formData.price || !formData.category || !formData.city || !formData.country || !formData.image) {
       setMessage({ text: 'Please fill all required fields', type: 'error' });
       setLoading(false);
       return;
@@ -79,7 +81,9 @@ const AddService = () => {
       formDataToSend.append('name', formData.name);
       formDataToSend.append('description', formData.description);
       formDataToSend.append('price', formData.price);
-      formDataToSend.append('category', formData.category);
+      formDataToSend.append('category', formData.category); // send category _id
+      formDataToSend.append('city', formData.city);
+      formDataToSend.append('country', formData.country);
       formDataToSend.append('isActive', formData.isActive);
       formDataToSend.append('image', formData.image);
 
@@ -99,10 +103,11 @@ const AddService = () => {
           price: '',
           image: null,
           category: '',
-          isActive: true
+          city: '',
+          country: '',
+          isActive: true,
         });
         setImagePreview(null);
-        // Reset file input
         document.getElementById('image').value = '';
       } else {
         setMessage({ text: data.message || 'Failed to add service', type: 'error' });
@@ -122,7 +127,9 @@ const AddService = () => {
       price: '',
       image: null,
       category: '',
-      isActive: true
+      city: '',
+      country: '',
+      isActive: true,
     });
     setImagePreview(null);
     setMessage({ text: '', type: '' });
@@ -205,6 +212,35 @@ const AddService = () => {
             </div>
           </div>
 
+          {/* New fields for city & country */}
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="city">City *</label>
+              <input
+                type="text"
+                id="city"
+                name="city"
+                value={formData.city}
+                onChange={handleInputChange}
+                placeholder="Enter city"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="country">Country *</label>
+              <input
+                type="text"
+                id="country"
+                name="country"
+                value={formData.country}
+                onChange={handleInputChange}
+                placeholder="Enter country"
+                required
+              />
+            </div>
+          </div>
+
           <div className="form-group">
             <label htmlFor="image">Service Image *</label>
             <input
@@ -221,7 +257,6 @@ const AddService = () => {
               </div>
             )}
           </div>
-
 
           <div className="form-actions">
             <button

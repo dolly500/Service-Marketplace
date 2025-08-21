@@ -19,22 +19,28 @@ const ServicesTable = () => {
   }, []);
 
   const fetchServices = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('http://localhost:4000/api/service/all');
-      const result = await response.json();
-      
-      if (result.success) {
-        setServices(result.data);
-      } else {
-        setError('Failed to fetch services');
+  try {
+    setLoading(true);
+    const token = localStorage.getItem('token'); // Retrieve the token
+    const response = await fetch('http://localhost:4000/api/service/all', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
       }
-    } catch (err) {
-      setError('Error connecting to API: ' + err.message);
-    } finally {
-      setLoading(false);
+    });
+    const result = await response.json();
+    
+    if (result.success) {
+      setServices(result.data);
+    } else {
+      setError('Failed to fetch services: ' + result.message);
     }
-  };
+  } catch (err) {
+    setError('Error connecting to API: ' + err.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const fetchCategories = async () => {
     try {
@@ -77,37 +83,39 @@ const ServicesTable = () => {
     setDeleteModal({ isOpen: false, service: null });
   };
 
+
   const handleConfirmDelete = async () => {
-    if (!deleteModal.service) return;
+  if (!deleteModal.service) return;
 
-    try {
-      setDeleteLoading(true);
+  try {
+    setDeleteLoading(true);
+    const token = localStorage.getItem('token'); // Retrieve the token
 
-      const response = await fetch('http://localhost:4000/api/service/remove', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          id: deleteModal.service._id
-        })
-      });
+    const response = await fetch('http://localhost:4000/api/service/remove', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        id: deleteModal.service._id
+      })
+    });
 
-      const result = await response.json();
+    const result = await response.json();
 
-      if (result.success) {
-        // Remove the service from local state
-        setServices(prev => prev.filter(service => service._id !== deleteModal.service._id));
-        handleCloseDeleteModal();
-      } else {
-        setError(result.message || 'Failed to delete service');
-      }
-    } catch (err) {
-      setError('Error deleting service: ' + err.message);
-    } finally {
-      setDeleteLoading(false);
+    if (result.success) {
+      setServices(prev => prev.filter(service => service._id !== deleteModal.service._id));
+      handleCloseDeleteModal();
+    } else {
+      setError(result.message || 'Failed to delete service');
     }
-  };
+  } catch (err) {
+    setError('Error deleting service: ' + err.message);
+  } finally {
+    setDeleteLoading(false);
+  }
+};
 
   const handleInputChange = (field, value) => {
     setEditModal(prev => ({
@@ -133,46 +141,49 @@ const ServicesTable = () => {
   };
 
   const handleUpdateService = async () => {
-    if (!editModal.service) return;
+  if (!editModal.service) return;
 
-    try {
-      setEditLoading(true);
-      setEditError(null);
+  try {
+    setEditLoading(true);
+    setEditError(null);
 
-      const formData = new FormData();
-      formData.append('id', editModal.service._id);
-      formData.append('name', editModal.service.name);
-      formData.append('description', editModal.service.description);
-      formData.append('price', editModal.service.price.toString());
-      formData.append('category', editModal.service.categoryName);
-      formData.append('isActive', editModal.service.isActive.toString());
-      
-      if (editModal.service.imageFile) {
-        formData.append('image', editModal.service.imageFile);
-      }
-
-      const response = await fetch(`http://localhost:4000/api/service/update`, {
-        method: 'PUT',
-        body: formData
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        // Update the service in the local state
-        setServices(prev => prev.map(service => 
-          service._id === editModal.service._id ? result.data : service
-        ));
-        handleCloseModal();
-      } else {
-        setEditError(result.message || 'Failed to update service');
-      }
-    } catch (err) {
-      setEditError('Error updating service: ' + err.message);
-    } finally {
-      setEditLoading(false);
+    const token = localStorage.getItem('token'); // Retrieve the token
+    const formData = new FormData();
+    formData.append('id', editModal.service._id);
+    formData.append('name', editModal.service.name);
+    formData.append('description', editModal.service.description);
+    formData.append('price', editModal.service.price.toString());
+    formData.append('category', editModal.service.categoryName);
+    formData.append('isActive', editModal.service.isActive.toString());
+    
+    if (editModal.service.imageFile) {
+      formData.append('image', editModal.service.imageFile);
     }
-  };
+
+    const response = await fetch(`http://localhost:4000/api/service/update`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}` // Add token
+      },
+      body: formData
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      setServices(prev => prev.map(service => 
+        service._id === editModal.service._id ? result.data : service
+      ));
+      handleCloseModal();
+    } else {
+      setEditError(result.message || 'Failed to update service');
+    }
+  } catch (err) {
+    setEditError('Error updating service: ' + err.message);
+  } finally {
+    setEditLoading(false);
+  }
+};
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);

@@ -7,6 +7,7 @@ import Profile from "./Pages/Profile/Profile";
 import Services from "./Pages/Services/Services";
 import Category from "./Pages/Category/Category";
 import CategoryServices from "./Components/CategoryService/CategoryService";
+import SearchResults from "./Pages/SearchResults/SearchResults";
 
 const App = () => {
   return (
@@ -20,6 +21,7 @@ const App = () => {
         <Route path="/profile" element={<Profile />} />
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/services" element={<Services />} />
+        <Route path="/searchservices" element={<SearchResults/>} />
         <Route path="/categories" element={<Category />} />
          <Route path="/category/:categoryName" element={<CategoryServices />} />
       </Routes>

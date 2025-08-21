@@ -1,4 +1,4 @@
-import React from "react";
+
 import "./Footer.css";
 import { assets } from "../../assets/frontend_assets/assets";
 
@@ -9,7 +9,7 @@ const Footer = () => {
         <div className="footer-content-left">
           <img className="logo" src={assets.logo} alt="Homease Logo" />
           <p>
-            Homease connects you with trusted professionals for all your home service needs.
+            Servicity connects you with trusted professionals for all your home service needs.
             Our vetted experts deliver quality services with convenience and reliability,
             helping you maintain a beautiful and functional living space without the hassle.
           </p>
@@ -42,15 +42,15 @@ const Footer = () => {
           <ul>
             <li className="contact-item">
               <i className="contact-icon phone-icon"></i>
-              +91-8603862290
+             -
             </li>
             <li className="contact-item">
               <i className="contact-icon email-icon"></i>
-              support@homease.com
+              support@servicity.com
             </li>
             <li className="contact-item">
               <i className="contact-icon location-icon"></i>
-              123 Service Lane, Bangalore, India
+              -
             </li>
           </ul>
         </div>
@@ -58,7 +58,7 @@ const Footer = () => {
       <div className="footer-bottom">
         <hr />
         <p className="footer-copyright">
-          &copy; {new Date().getFullYear()} Homease - Your Home Service Partner | All Rights Reserved
+          &copy; {new Date().getFullYear()} Servicity - Your Home Service Partner | All Rights Reserved
         </p>
       </div>
     </div>

@@ -22,6 +22,26 @@ const serviceSchema = new mongoose.Schema({
         required: true,
         ref: 'category'
     },
+    location: {
+        city: { 
+            type: String, 
+            required: false 
+        },
+        country: { 
+            type: String, 
+            required: false 
+        },
+        coordinates: {
+            latitude: { 
+                type: Number, 
+                required: false 
+            },
+            longitude: { 
+                type: Number,  
+                required: false 
+            }
+        }
+    },
     isActive: { 
         type: Boolean, 
         default: true 
@@ -34,6 +54,11 @@ const serviceSchema = new mongoose.Schema({
         type: Date, 
         default: Date.now 
     }
+});
+
+// ✅ Correct geospatial index
+serviceSchema.index({ 
+    'location.coordinates': '2dsphere' 
 });
 
 // Update updatedAt before saving

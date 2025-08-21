@@ -9,7 +9,8 @@ import {
     updateService,
     deleteService,
     removeService,
-    getServiceDetail 
+    getServiceDetail,
+    searchServices
 } from '../controllers/serviceController.js';
 import authMiddleware from '../middleware/authMiddleware.js';
 
@@ -25,7 +26,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// Admin routes (require authentication - assuming authMiddleware validates admin)
+// Admin routes (require authentication)
 serviceRouter.post("/add", upload.single("image"), addService);
 serviceRouter.put("/update", upload.single("image"), updateService);
 serviceRouter.post("/delete", deleteService); 
@@ -37,5 +38,6 @@ serviceRouter.get("/list", listService);
 serviceRouter.get("/detail/:id", getServiceDetail); 
 serviceRouter.get("/category/:category", listServicesByCategory);
 serviceRouter.get("/provider/:providerId", getServicesByProvider);
+serviceRouter.get("/search", searchServices);
 
 export default serviceRouter;
