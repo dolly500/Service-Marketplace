@@ -251,260 +251,274 @@ export const resetPassword = async (req, res) => {
 
 // SERVICE PROVIDERS
 
-
-// Register service provider
-
 const registerServiceProvider = async (req, res) => {
-    try {
-        const {
-            name,
-            email,
-            password,
-            phone,
-            businessName,
-            businessAddress,
-            businessDescription
-        } = req.body;
+  try {
+    const {
+      name,
+      email,
+      password,
+      phone,
+      businessName,
+      businessAddress,
+      businessDescription
+    } = req.body;
 
-        console.log('Registration attempt for email:', email);
-        console.log('Password received:', password);
+    console.log('Registration attempt for email:', email);
 
-        // Check if all required fields are provided
-        if (!name || !email || !password || !phone || !businessName || !businessAddress || !businessDescription) {
-            if (req.file) {
-                fs.unlink(`uploads/${req.file.filename}`, () => {});
-            }
-            return res.json({
-                success: false,
-                message: "All fields are required"
-            });
-        }
-
-        // Check if service provider already exists
-        const existingProvider = await serviceProviderModel.findOne({ 
-            email: email.toLowerCase().trim() 
-        });
-        if (existingProvider) {
-            if (req.file) {
-                fs.unlink(`uploads/${req.file.filename}`, () => {});
-            }
-            return res.json({
-                success: false,
-                message: "Service provider with this email already exists"
-            });
-        }
-
-        // Validate password strength
-        if (password.length < 6) {
-            if (req.file) {
-                fs.unlink(`uploads/${req.file.filename}`, () => {});
-            }
-            return res.json({
-                success: false,
-                message: "Password must be at least 6 characters long"
-            });
-        }
-
-        // Create new service provider - Let pre-save middleware handle hashing
-        const serviceProvider = new serviceProviderModel({
-            name: name.trim(),
-            email: email.toLowerCase().trim(),
-            password: password, 
-            phone,
-            businessName: businessName.trim(),
-            businessAddress,
-            businessDescription,
-            profileImage: req.file ? req.file.filename : null
-        });
-
-        console.log('Saving service provider...');
-        await serviceProvider.save();
-        console.log('Service provider saved successfully');
-
-        // Generate token
-        const token = generateToken(serviceProvider._id);
-
-        // Remove password from response
-        const providerResponse = serviceProvider.toObject();
-        delete providerResponse.password;
-
-        res.json({
-            success: true,
-            message: "Service provider registered successfully",
-            data: {
-                serviceProvider: providerResponse,
-                token
-            }
-        });
-
-    } catch (error) {
-        console.log('Registration error:', error);
-        if (req.file) {
-            fs.unlink(`uploads/${req.file.filename}`, () => {});
-        }
-        res.json({
-            success: false,
-            message: "Error registering service provider"
-        });
+    // Check if all required fields are provided
+    if (!name || !email || !password || !phone || !businessName || !businessAddress || !businessDescription) {
+      if (req.file) {
+        fs.unlink(`uploads/${req.file.filename}`, () => {});
+      }
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required"
+      });
     }
+
+    // Check if service provider already exists
+    const existingProvider = await serviceProviderModel.findOne({
+      email: email.toLowerCase().trim()
+    });
+    if (existingProvider) {
+      if (req.file) {
+        fs.unlink(`uploads/${req.file.filename}`, () => {});
+      }
+      return res.status(400).json({
+        success: false,
+        message: "Service provider with this email already exists"
+      });
+    }
+
+    // Validate password strength
+    if (password.length < 6) {
+      if (req.file) {
+        fs.unlink(`uploads/${req.file.filename}`, () => {});
+      }
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters long"
+      });
+    }
+
+    // Create new service provider
+    const serviceProvider = new serviceProviderModel({
+      name: name.trim(),
+      email: email.toLowerCase().trim(),
+      password, // Password will be hashed by pre-save middleware
+      phone,
+      businessName: businessName.trim(),
+      businessAddress,
+      businessDescription,
+      profileImage: req.file ? req.file.filename : null,
+      isApproved: false // Set to false, pending admin approval
+    });
+
+    console.log('Saving service provider...');
+    await serviceProvider.save();
+    console.log('Service provider saved successfully');
+
+    // Email to Admin
+    const adminMailOptions = {
+      from: process.env.EMAIL_USER,
+      to: process.env.ADMIN_EMAIL,
+      subject: "New Service Provider Awaiting Approval",
+      text: `A new service provider has registered:\n\n
+             Name: ${name}\n
+             Email: ${email}\n
+             Business: ${businessName}\n
+             Please review and approve/reject this provider.`
+    };
+
+    // Email to Provider
+    const providerMailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Registration Received - Pending Approval",
+      text: `Hello ${name},\n\n
+Thank you for registering as a service provider on Servicity.\n
+Your business "${businessName}" has been submitted for review.\n
+Our admin team will verify your details and notify you once your account is approved.\n\n
+Best regards,\nThe Team`
+    };
+
+    // Send both emails in parallel
+    await Promise.all([
+      transporter.sendMail(adminMailOptions),
+      transporter.sendMail(providerMailOptions)
+    ]).catch(err => console.error("Email sending error:", err));
+
+    // ✅ Respond with provider info
+    res.status(201).json({
+      success: true,
+      message: "Registration successful. Awaiting admin approval.",
+      provider: {
+        id: serviceProvider._id,
+        name: serviceProvider.name,
+        email: serviceProvider.email,
+        businessName: serviceProvider.businessName
+      }
+    });
+  } catch (error) {
+    console.log('Registration error:', error);
+    if (req.file) {
+      fs.unlink(`uploads/${req.file.filename}`, () => {});
+    }
+    res.status(500).json({
+      success: false,
+      message: "Error registering service provider"
+    });
+  }
 };
 
-// Login service provider
+
+// Approve Service Provider Endpoint
+const approveServiceProvider = async (req, res) => {
+  try {
+    const { providerId, isApproved } = req.body;
+
+    // Check if required fields are provided
+    if (!providerId || typeof isApproved !== 'boolean') {
+      return res.status(400).json({
+        success: false,
+        message: "Provider ID and approval status are required"
+      });
+    }
+
+    // Find service provider
+    const serviceProvider = await serviceProviderModel.findById(providerId);
+    if (!serviceProvider) {
+      return res.status(404).json({
+        success: false,
+        message: "Service provider not found"
+      });
+    }
+
+    // Update approval status
+    serviceProvider.isApproved = isApproved;
+    await serviceProvider.save();
+
+    // Send notification email to provider
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: serviceProvider.email,
+      subject: isApproved ? "Service Provider Approval" : "Service Provider Application Update",
+      text: `Hello ${serviceProvider.name},\n\n
+        Your service provider application for "${serviceProvider.businessName}" has been ${isApproved ? 'approved' : 'rejected'}. you can now login as a provider.\n
+        ${isApproved ?
+          'You can now log in and start offering your services on Servicity.' : 
+          'Please contact our support team for more information.'}\n\n
+        Best regards,\nThe Team`
+    };
+
+    await transporter.sendMail(mailOptions).catch(err => 
+      console.error("Email sending error:", err)
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `Service provider ${isApproved ? 'approved' : 'rejected'} successfully`
+    });
+  } catch (error) {
+    console.error('Approval error:', error);
+    res.status(500).json({
+      success: false,
+      message: "Error processing approval request"
+    });
+  }
+};
+
+// Service Provider Login Endpoint
 const loginServiceProvider = async (req, res) => {
-    try {
-        const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-        console.log('Login attempt for email:', email); // Add debugging
-
-        // Check if email and password are provided
-        if (!email || !password) {
-            return res.json({
-                success: false,
-                message: "Email and password are required"
-            });
-        }
-
-        // Find service provider by email (case-insensitive)
-        const serviceProvider = await serviceProviderModel.findOne({ 
-            email: email.toLowerCase().trim() 
-        });
-        
-        console.log('Service provider found:', serviceProvider ? 'Yes' : 'No'); // Add debugging
-        
-        if (!serviceProvider) {
-            return res.json({
-                success: false,
-                message: "Invalid email or password"
-            });
-        }
-
-        // Check if account is active
-        if (!serviceProvider.isActive) {
-            return res.json({
-                success: false,
-                message: "Your account has been deactivated. Please contact support."
-            });
-        }
-
-        // Compare password
-        console.log('Comparing passwords...'); // Add debugging
-        const isPasswordValid = await serviceProvider.comparePassword(password);
-        console.log('Password valid:', isPasswordValid); // Add debugging
-        
-        if (!isPasswordValid) {
-            return res.json({
-                success: false,
-                message: "Invalid email or password"
-            });
-        }
-
-        // Generate token
-        const token = generateToken(serviceProvider._id);
-
-        // Remove password from response
-        const providerResponse = serviceProvider.toObject();
-        delete providerResponse.password;
-
-        res.json({
-            success: true,
-            message: "Login successful",
-            data: {
-                serviceProvider: providerResponse,
-                token
-            }
-        });
-
-    } catch (error) {
-        console.log('Login error:', error);
-        res.json({
-            success: false,
-            message: "Error logging in"
-        });
+    // Check if all required fields are
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required"
+      });
     }
+
+    // Find service provider
+    const serviceProvider = await serviceProviderModel.findOne({
+      email: email.toLowerCase().trim()
+    });
+
+    if (!serviceProvider) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or password"
+      });
+    }
+
+    // Check if approved
+    if (!serviceProvider.isApproved) {
+      return res.status(403).json({
+        success: false,
+        message: "Account is pending approval"
+      });
+    }
+
+    // Verify password
+    const isPasswordValid = await bcryptjs.compare(password, serviceProvider.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or password"
+      });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      {
+        id: serviceProvider._id,
+        email: serviceProvider.email,
+        role: 'serviceProvider'
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Login successful",
+      token,
+      provider: {
+        id: serviceProvider._id,
+        name: serviceProvider.name,
+        email: serviceProvider.email,
+        businessName: serviceProvider.businessName
+      }
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({
+      success: false,
+      message: "Error logging in service provider"
+    });
+  }
 };
 
-// Get service provider profile
-const getProfile = async (req, res) => {
-    try {
-        const serviceProvider = await serviceProviderModel.findById(req.serviceProvider.id).select('-password');
-        
-        if (!serviceProvider) {
-            return res.json({
-                success: false,
-                message: "Service provider not found"
-            });
-        }
-
-        res.json({
-            success: true,
-            data: serviceProvider
-        });
-
-    } catch (error) {
-        console.log(error);
-        res.json({
-            success: false,
-            message: "Error fetching profile"
-        });
-    }
+const getAllProviders = async (req, res) => {
+  try {
+    const providers = await serviceProviderModel.find({}, 'name email businessName isApproved _id');
+    res.json({
+      success: true,
+      count: providers.length,
+      providers: providers
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
 };
-
-// Update service provider profile
-const updateProfile = async (req, res) => {
-    try {
-        const { name, phone, businessName, businessAddress, businessDescription } = req.body;
-
-        const updateData = {};
-        if (name) updateData.name = name;
-        if (phone) updateData.phone = phone;
-        if (businessName) updateData.businessName = businessName;
-        if (businessAddress) updateData.businessAddress = businessAddress;
-        if (businessDescription) updateData.businessDescription = businessDescription;
-
-        // If new profile image is uploaded
-        if (req.file) {
-            const serviceProvider = await serviceProviderModel.findById(req.serviceProvider.id);
-            if (serviceProvider && serviceProvider.profileImage) {
-                // Remove old profile image
-                fs.unlink(`uploads/${serviceProvider.profileImage}`, () => {});
-            }
-            updateData.profileImage = req.file.filename;
-        }
-
-        const serviceProvider = await serviceProviderModel.findByIdAndUpdate(
-            req.serviceProvider.id,
-            updateData,
-            { new: true }
-        ).select('-password');
-
-        if (!serviceProvider) {
-            return res.json({
-                success: false,
-                message: "Service provider not found"
-            });
-        }
-
-        res.json({
-            success: true,
-            message: "Profile updated successfully",
-            data: serviceProvider
-        });
-
-    } catch (error) {
-        console.log(error);
-        if (req.file) {
-            fs.unlink(`uploads/${req.file.filename}`, () => {});
-        }
-        res.json({
-            success: false,
-            message: "Error updating profile"
-        });
-    }
-};
-
 export {
     registerServiceProvider,
     loginServiceProvider,
-    getProfile,
-    updateProfile
+    approveServiceProvider,
+    getAllProviders,
 };

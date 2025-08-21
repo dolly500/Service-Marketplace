@@ -238,33 +238,13 @@ const Profile = () => {
         </div>
         
         <div className="recent-orders-section">
-          <h3>Recent Orders</h3>
+          <h3>Recent Bookings</h3>
           
           {orders.length === 0 ? (
-            <p>You don't have any orders yet.</p>
+            <p>You don't have any bookings yet.</p>
           ) : (
             <div className="recent-orders-list">
-              {orders.slice(0, 5).map(order => (
-                <div key={order._id} className="order-card-small">
-                  <div className="order-header-small">
-                    <span>Order #{order.orderId}</span>
-                    <span className={`order-status-small ${order.trackingStatus}`}>
-                      {order.trackingStatus.replace(/_/g, ' ').toUpperCase()}
-                    </span>
-                  </div>
-                  <div className="order-details-small">
-                    <p><strong>Date:</strong> {formatDate(order.createdAt)}</p>
-                    <p><strong>Amount:</strong> ₹{order.amount}</p>
-                  </div>
-                  <button onClick={() => navigate('/my-orders')}>View Details</button>
-                </div>
-              ))}
-              
-              {orders.length > 5 && (
-                <div className="view-all">
-                  <button onClick={() => navigate('/my-orders')}>View All Orders</button>
-                </div>
-              )}
+             
             </div>
           )}
         </div>

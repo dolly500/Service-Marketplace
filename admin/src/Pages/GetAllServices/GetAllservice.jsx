@@ -199,7 +199,7 @@ const ServicesTable = () => {
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'GBP'
     }).format(price);
   };
 
@@ -388,7 +388,7 @@ const ServicesTable = () => {
 
               <div style={styles.formRow}>
                 <div style={styles.formGroup}>
-                  <label style={styles.label}>Price ($)</label>
+                  <label style={styles.label}>Price (£)</label>
                   <input
                     type="number"
                     value={editModal.service?.price || ''}

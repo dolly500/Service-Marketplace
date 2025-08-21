@@ -6,10 +6,10 @@ import {
   login,
   forgotPassword,
   resetPassword,
-  registerServiceProvider, 
-  loginServiceProvider, 
-  getProfile, 
-  updateProfile 
+  registerServiceProvider,
+  loginServiceProvider,
+  approveServiceProvider,
+  getAllProviders,
 } from "../controllers/authController.js";
 import authMiddleware from '../middleware/authMiddleware.js';
 
@@ -28,10 +28,10 @@ const upload = multer({ storage: storage });
 // Auth service provider routes
 authRouter.post("/register-service", upload.single("profileImage"), registerServiceProvider);
 authRouter.post("/login-service", loginServiceProvider);
-authRouter.get("/profile-service", authMiddleware, getProfile);
-authRouter.put("/profile-service", authMiddleware, upload.single("profileImage"), updateProfile);
+authRouter.post("/approve-service", approveServiceProvider);
+authRouter.get("/providers", getAllProviders);
 
-
+// Other auth routes
 authRouter.post("/request-otp", requestOtp);
 authRouter.post("/signup", signUp);
 authRouter.post("/login", login);

@@ -33,6 +33,14 @@ const serviceProviderSchema = mongoose.Schema({
         type: String,
         required: true
     },
+    isApproved: { 
+        type: Boolean, 
+        default: false 
+    },
+    isActive: { 
+        type: Boolean, 
+        default: true 
+    },
     businessDescription: {
         type: String,
         required: true
@@ -44,10 +52,6 @@ const serviceProviderSchema = mongoose.Schema({
     isVerified: {
         type: Boolean,
         default: false
-    },
-    isActive: {
-        type: Boolean,
-        default: true
     },
     createdAt: {
         type: Date,

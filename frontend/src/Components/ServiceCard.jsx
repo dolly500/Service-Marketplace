@@ -16,7 +16,7 @@ const ServiceCard = ({
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'GBP'
     }).format(price);
   };
 
@@ -27,7 +27,7 @@ const ServiceCard = ({
   };
 
   const handleBookClick = (e) => {
-    e.stopPropagation(); // Prevent card click when booking
+    e.stopPropagation(); 
     if (onBookClick) {
       onBookClick(id);
     }

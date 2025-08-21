@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import "./List1.css";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -49,7 +49,7 @@ const List = ({ url }) => {
               <img src={`${url}/images/` + item.image} alt="" />
               <p>{item.name}</p>
               <p>{item.category}</p>
-              <p>Rs{item.price}</p>
+              <p>£{item.price}</p>
               <p onClick={() => removeService(item._id)} className="cursor">
                 X
               </p>
