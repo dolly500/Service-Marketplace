@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import "./AuthPage.css";
+import Logo from "../../../src/assets/frontend_assets/Logo_for_Quickie_Chores_with_Icons-removebg-preview.png"
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
 
@@ -44,7 +45,6 @@ const AuthPage = () => {
       const response = await axios.post(
         `${API_BASE_URL}/auth/request-otp`,
         { email },
-        { timeout: 10000 }
       );
       if (response.data.success) {
         alert("OTP sent to your email.");
@@ -87,7 +87,7 @@ const AuthPage = () => {
         if (response.data.token) {
           localStorage.setItem("token", response.data.token);
           alert("Account created successfully! Redirecting to homepage...");
-          window.location.href = "/";
+          window.location.href = "/home";
         } else {
           alert("Account created successfully! Please log in.");
           // Reset fields
@@ -135,7 +135,7 @@ const AuthPage = () => {
         localStorage.setItem("token", response.data.token);
         
         alert("Logged in successfully!");
-        window.location.href = "/";
+        window.location.href = "/home";
       } else {
         setError(response.data.message || "Login failed");
         alert(response.data.message || "Wrong username or password.");
@@ -222,8 +222,9 @@ const AuthPage = () => {
 
   return (
     <div className="auth-page">
+      <img src={Logo} alt="" height="190vh"/>
       <h2>
-        {forgotPassword ? "Forgot Password" : isSignUp ? "Sign Up" : "Log In"}
+        {forgotPassword ? "Forgot Password" : isSignUp ? "SignUp Here" : "LogIn to Quickie Chore"}
       </h2>
       
       {serverStatus === "offline" && (

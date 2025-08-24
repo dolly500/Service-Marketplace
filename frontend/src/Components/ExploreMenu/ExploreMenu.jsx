@@ -85,16 +85,16 @@ const ExploreMenu = ({ category, setCategory }) => {
   if (loading) {
     return (
       <div className="explore-services" id="explore-services">
-        <div className="explore-services-header">
-          <h1>Checkout our Recent Service <span className="highlight">Category</span></h1>
+        {/* <div className="explore-services-header">
+          <h1>Checkout Our Chores <span className="highlight">Categories</span></h1>
           <p className="explore-services-subtitle">
             Service categories help organize and structure the offerings on a marketplace,
             <br />making it easier for users to find what they need.
           </p>
-        </div>
+        </div> */}
         <div className="loading-container">
           <div className="loading-spinner"></div>
-          <p>Loading service categories...</p>
+          <p>Loading Chores categories...</p>
         </div>
       </div>
     );
@@ -103,13 +103,13 @@ const ExploreMenu = ({ category, setCategory }) => {
   if (error) {
     return (
       <div className="explore-services" id="explore-services">
-        <div className="explore-services-header">
-          <h1>Checkout our Recent Service <span className="highlight">Category</span></h1>
+        {/* <div className="explore-services-header">
+          <h1>Checkout Our Service <span className="highlight">Categories</span></h1>
           <p className="explore-services-subtitle">
             Service categories help organize and structure the offerings on a marketplace,
             <br />making it easier for users to find what they need.
           </p>
-        </div>
+        </div> */}
         <div className="error-container">
           <p>Error loading service categories: {error}</p>
           <button onClick={() => window.location.reload()} className="retry-btn">
@@ -122,13 +122,9 @@ const ExploreMenu = ({ category, setCategory }) => {
 
   return (
     <div className="explore-services" id="explore-services">
-      <div className="explore-services-header">
-        <h1>Checkout our Recent Service <span className="highlight">Category</span></h1>
-        <p className="explore-services-subtitle">
-          Service categories help organize and structure the offerings on a marketplace,
-          <br />making it easier for users to find what they need.
-        </p>
-      </div>
+      {/* <div className="explore-services-header">
+        <h1>Checkout Our Chores <span className="highlight">Categories</span></h1>
+      </div> */}
       
       <div className="category-carousel">
         <button 
@@ -160,7 +156,7 @@ const ExploreMenu = ({ category, setCategory }) => {
                 </div>
                 <div className="category-info">
                   <h3 className="category-name">{item.name}</h3>
-                  <p className="category-count">{item.serviceCount} Services</p>
+                  <p className="category-count">{item.serviceCount} Chores</p>
                 </div>
               </div>
             );
@@ -182,7 +178,7 @@ const ExploreMenu = ({ category, setCategory }) => {
             className="view-all-btn"
             onClick={() => setCategory("All")}
           >
-            View All <span className="arrow">→</span>
+            View All Chores
           </button>
         </a>
       </div>

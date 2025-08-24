@@ -69,10 +69,10 @@ function Services() {
   if (loading) {
     return (
       <div style={styles.serviceDisplay}>
-        <h2 style={styles.title}>Top services near you!</h2>
+        <h2 style={styles.title}>Top Chores near you!</h2>
         <div style={styles.loadingContainer}>
           <div style={styles.loadingSpinner}></div>
-          <p style={styles.loadingText}>Loading services...</p>
+          <p style={styles.loadingText}>Loading Chores...</p>
         </div>
       </div>
     );
@@ -81,9 +81,9 @@ function Services() {
   if (error) {
     return (
       <div style={styles.serviceDisplay}>
-        <h2 style={styles.title}>Top services near you!</h2>
+        <h2 style={styles.title}>Top Chores near you!</h2>
         <div style={styles.errorContainer}>
-          <p style={styles.errorText}>Error loading services: {error}</p>
+          <p style={styles.errorText}>Error loading Chores: {error}</p>
           <button style={styles.retryBtn} onClick={fetchServices}>
             Retry
           </button>
@@ -95,7 +95,7 @@ function Services() {
   return (
     <>
       <div style={styles.serviceDisplay}>
-        <h2 style={styles.title}>CheckOut for All services</h2>
+        <h2 style={styles.title}>CheckOut for All Chores</h2>
         <div style={styles.serviceDisplayList}>
           {services.map((service) => (
             <ServiceCard

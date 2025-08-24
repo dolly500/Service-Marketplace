@@ -9,7 +9,7 @@ const Footer = () => {
         <div className="footer-content-left">
           <img className="logo" src={assets.logo} alt="Homease Logo" />
           <p>
-            Servicity connects you with trusted professionals for all your home service needs.
+            Quickie Chores connects you with trusted professionals for all your home service needs.
             Our vetted experts deliver quality services with convenience and reliability,
             helping you maintain a beautiful and functional living space without the hassle.
           </p>
@@ -46,7 +46,7 @@ const Footer = () => {
             </li>
             <li className="contact-item">
               <i className="contact-icon email-icon"></i>
-              support@servicity.com
+              support@quickiechores.com
             </li>
             <li className="contact-item">
               <i className="contact-icon location-icon"></i>
@@ -58,7 +58,7 @@ const Footer = () => {
       <div className="footer-bottom">
         <hr />
         <p className="footer-copyright">
-          &copy; {new Date().getFullYear()} Servicity - Your Home Service Partner | All Rights Reserved
+          &copy; {new Date().getFullYear()} Quickiechores | All Rights Reserved
         </p>
       </div>
     </div>

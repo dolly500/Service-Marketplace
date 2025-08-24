@@ -7,6 +7,8 @@ import AddCategory from "./Pages/AddCategory/Add";
 import AddService from "./Pages/AddService/Service";
 import GetCat from './Pages/GetCategory/getCategory'
 import GetAllServices from './Pages/GetAllServices/GetAllservice'
+import Approveservice from './Pages/ApproveService/Approveservice'
+import Allproviders from './Pages/Allproviders/Allproviders'
 
 
 const App = () => {
@@ -24,6 +26,8 @@ const App = () => {
           <Route path="/addservice" element={<AddService url={url} />} />
           <Route path="/getcategory" element={<GetCat url={url} />} />
           <Route path="/getallservices" element={<GetAllServices url={url} />} />
+          <Route path="/approveproviders" element={<Approveservice url={url} />} />
+          <Route path="/allproviders" element={<Allproviders url={url} />} />
         </Routes>
       </div>
     </div>

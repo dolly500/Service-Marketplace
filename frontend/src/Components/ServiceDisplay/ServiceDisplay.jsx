@@ -60,7 +60,7 @@ const ServiceDisplay = ({ category }) => {
       searchServices(searchQuery, searchLocation || '');
     } else {
       setSearchResults([]);
-      setDisplayTitle("Top services near you!");
+      setDisplayTitle("Top Chores near you!");
     }
   }, [searchQuery, searchLocation]);
 

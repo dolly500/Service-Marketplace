@@ -40,7 +40,7 @@ const Sidebar = () => {
       <div className="sidebar-section">
         <h3 className="section-title">People</h3>
         <div className="sidebar-options">
-          <NavLink to="" className="sidebar-option">
+          <NavLink to="/allproviders" className="sidebar-option">
             <img src={assets.order_icon} alt="" />
             <p>Providers</p>
           </NavLink>
@@ -74,11 +74,7 @@ const Sidebar = () => {
             <img src={assets.order_icon} alt="" />
             <p>Transactions</p>
           </NavLink>
-          <NavLink to="" className="sidebar-option">
-            <img src={assets.order_icon} alt="" />
-            <p>Provider Earning</p>
-          </NavLink>
-          <NavLink to="" className="sidebar-option">
+          <NavLink to="/approveproviders" className="sidebar-option">
             <img src={assets.order_icon} alt="" />
             <p>Provider Request</p>
           </NavLink>

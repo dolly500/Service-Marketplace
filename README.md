@@ -1,4 +1,4 @@
-# Servicity Marketplace Application
+# QuickChore Marketplace Application
 
 A service platform for home services.
 

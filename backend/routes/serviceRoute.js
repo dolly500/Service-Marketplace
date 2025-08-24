@@ -12,7 +12,7 @@ import {
     getServiceDetail,
     searchServices
 } from '../controllers/serviceController.js';
-import authMiddleware from '../middleware/authMiddleware.js';
+
 
 const serviceRouter = express.Router();
 

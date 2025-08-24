@@ -6,49 +6,61 @@ import mongoose from "mongoose";
 import serviceProviderModel from "../models/serviceProviderModel.js";
 import fs from 'fs';
 
-const generateToken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET, {
-        expiresIn: process.env.JWT_EXPIRES_IN || '7d'
-    });
-};
+
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
 });
 
-const otps = {}; // Temporary in-memory storage for OTPs
+
+
+const otps = {}; 
 
 export const requestOtp = async (req, res) => {
-  const { email } = req.body;
-  const otp = Math.floor(100000 + Math.random() * 900000).toString();
-  otps[email] = otp;
-
-  // Print OTP to console for debugging
-  console.log("=============================================");
-  console.log(`OTP SENT TO ${email}: ${otp}`);
-  console.log("=============================================");
-
-  const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to: email,
-    subject: "Your OTP for Homease",
-    text: `Your OTP is: ${otp}`,
-  };
-
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.error("Error sending OTP email:", error);
-      return res
-        .status(500)
-        .json({ success: false, message: "Failed to send OTP" });
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, message: "Email is required" });
     }
-    res.status(200).json({ success: true, message: "OTP sent successfully" });
-  });
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    otps[email] = otp;
+
+    console.log("=============================================");
+    console.log(`OTP SENT TO ${email}: ${otp}`);
+    console.log("=============================================");
+
+    // Respond immediately
+    res.status(200).json({ success: true, message: "OTP generated successfully" });
+
+    // Send mail in background
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Your OTP for Quickiechores",
+      text: `Your OTP is: ${otp}`,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("❌ Error sending OTP email:", error);
+      } else {
+        console.log("✅ OTP email sent:", info.response);
+      }
+    });
+
+  } catch (err) {
+    console.error("Error in requestOtp:", err);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
 };
+
 
 export const signUp = async (req, res) => {
   try {
@@ -404,7 +416,7 @@ const approveServiceProvider = async (req, res) => {
       to: serviceProvider.email,
       subject: isApproved ? "Service Provider Approval" : "Service Provider Application Update",
       text: `Hello ${serviceProvider.name},\n\n
-        Your service provider application for "${serviceProvider.businessName}" has been ${isApproved ? 'approved' : 'rejected'}. you can now login as a provider.\n
+        Your service provider application for "${serviceProvider.businessName}" has been ${isApproved ? 'approved' : 'rejected'}.\n
         ${isApproved ?
           'You can now log in and start offering your services on Servicity.' : 
           'Please contact our support team for more information.'}\n\n
@@ -489,7 +501,8 @@ const loginServiceProvider = async (req, res) => {
         id: serviceProvider._id,
         name: serviceProvider.name,
         email: serviceProvider.email,
-        businessName: serviceProvider.businessName
+        businessName: serviceProvider.businessName,
+        role: "serviceProvider"
       }
     });
   } catch (error) {
@@ -503,7 +516,11 @@ const loginServiceProvider = async (req, res) => {
 
 const getAllProviders = async (req, res) => {
   try {
-    const providers = await serviceProviderModel.find({}, 'name email businessName isApproved _id');
+    const providers = await serviceProviderModel.find(
+      {}, 
+      'name email businessName businessAddress businessDescription isApproved _id'
+    );
+
     res.json({
       success: true,
       count: providers.length,
@@ -516,6 +533,7 @@ const getAllProviders = async (req, res) => {
     });
   }
 };
+
 export {
     registerServiceProvider,
     loginServiceProvider,

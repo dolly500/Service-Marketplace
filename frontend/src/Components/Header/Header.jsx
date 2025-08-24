@@ -82,7 +82,7 @@ const Header = () => {
           </div>
           
           <h1 className="header-title">
-            Get your<span className="title-highlight"> Home Services</span>
+            Get your<span className="title-highlight"> Home Chores</span>
           </h1>
           
           <p className="header-subtitle">
@@ -96,7 +96,7 @@ const Header = () => {
                 <Search className="search-icon" size={20} />
                 <input 
                   type="text" 
-                  placeholder="Search for Service (e.g., cleaning, plumbing)"
+                  placeholder="Search for Chores (e.g., cleaning, plumbing)"
                   value={searchQuery}
                   onChange={handleInputChange}
                   className="search-input"
@@ -133,47 +133,6 @@ const Header = () => {
                 Search
               </button>
             </form>
-          </div>
-
-          {/* Popular Searches */}
-          <div className="popular-searches">
-            <span className="popular-label">Popular:</span>
-            <div className="search-tags">
-              {["Cleaning", "Plumbing", "Electrical", "Handyman", "Painting", "Gardening", "Carpentry", "Pest Control"].map((tag, idx) => (
-                <span 
-                  key={idx}
-                  className="search-tag" 
-                  onClick={() => handleSuggestionClick(tag)}
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Statistics */}
-          <div className="stats-container">
-            <div className="stat-item">
-              <Shield className="stat-icon" size={24} />
-              <div className="stat-content">
-                <span className="stat-number">215,292 +</span>
-                <span className="stat-label">Verified Providers</span>
-              </div>
-            </div>
-            <div className="stat-item">
-              <Calendar className="stat-icon" size={24} />
-              <div className="stat-content">
-                <span className="stat-number">90,000+</span>
-                <span className="stat-label">Services Completed</span>
-              </div>
-            </div>
-            <div className="stat-item">
-              <Star className="stat-icon" size={24} />
-              <div className="stat-content">
-                <span className="stat-number">2,390,968</span>
-                <span className="stat-label">Reviews Globally</span>
-              </div>
-            </div>
           </div>
         </div>      
       </div>

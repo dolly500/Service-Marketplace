@@ -11,7 +11,8 @@ import {
   approveServiceProvider,
   getAllProviders,
 } from "../controllers/authController.js";
-import authMiddleware from '../middleware/authMiddleware.js';
+import { protectProvider } from "../middleware/providerAuth.js";
+
 
 const authRouter = express.Router();
 
@@ -30,6 +31,14 @@ authRouter.post("/register-service", upload.single("profileImage"), registerServ
 authRouter.post("/login-service", loginServiceProvider);
 authRouter.post("/approve-service", approveServiceProvider);
 authRouter.get("/providers", getAllProviders);
+
+//Service Providers routes
+authRouter.get("/me-service", protectProvider, (req, res) => {
+  res.json({
+    success: true,
+    provider: req.provider,
+  });
+});
 
 // Other auth routes
 authRouter.post("/request-otp", requestOtp);
