@@ -2,42 +2,39 @@ import express from "express";
 import cors from "cors";
 import { connectDB } from "./config/db.js";
 import serviceRouter from "./routes/serviceRoute.js";
-import categoryRouter from "./routes/categoryRoutes.js"
-// import userRouter from "./routes/userRoute.js";
+import categoryRouter from "./routes/categoryRoutes.js";
+import paymentRoutes from "./routes/paymentRoutes.js"
 import "dotenv/config";
-// import DescopeClient from "@descope/node-sdk";
 import authRouter from "./routes/authRoute.js";
+import bookingRouter from "./routes/bookingRouter.js";
 import mongoose from "mongoose";
 
-// app config
+
 const app = express();
 const port = 4000;
+
+app.use('/api/payments/webhook', paymentRoutes);
 
 // middleware
 app.use(express.json());
 app.use(
   cors({
-    origin: "*", 
+    origin: "*",
   })
 );
 app.set("json spaces", 2);
 
-//db connection
-let dbConnection = null;
-try {
-  dbConnection = await connectDB();
-  console.log("DB Connected");
-} catch (error) {
-  console.error("Database connection error:", error);
-}
+// routes
 
-//api endpoints
+app.use('/api/payments', paymentRoutes);
 app.use("/api/service", serviceRouter);
 app.use("/api/category", categoryRouter);
+app.use("/api/booking", bookingRouter);
 app.use("/images", express.static("uploads"));
 app.use("/api/auth", authRouter);
 
-// Enhanced health check endpoint
+
+// health check
 app.get("/api/health-check", async (req, res) => {
   try {
     const dbStatus =
@@ -71,38 +68,48 @@ app.get("/api/health-check", async (req, res) => {
   }
 });
 
-
 app.get("/", (req, res) => {
   res.send("API Working");
 });
 
 app.get("/orders", async (req, res) => {
   try {
-    const orders = await Order.find().populate("services"); // Populate service details
+    const orders = await Order.find().populate("services");
     res.json(orders);
   } catch (error) {
     res.status(500).json({ error: "Error fetching orders" });
   }
 });
 
-// Improved error handling for routes that don't exist
 app.use((req, res) => {
-  res.status(404).json({ 
-    status: "error", 
-    message: "Route not found" 
+  res.status(404).json({
+    status: "error",
+    message: "Route not found",
   });
 });
 
-// Global error handler
 app.use((err, req, res, next) => {
   console.error("Unhandled error:", err);
   res.status(500).json({
     status: "error",
     message: "Internal server error",
-    error: process.env.NODE_ENV === 'production' ? undefined : err.message
+    error: process.env.NODE_ENV === "production" ? undefined : err.message,
   });
 });
 
-app.listen(port, () => {
-  console.log(`Server Started on http://localhost:${port}`);
-});
+// ✅ Proper startup
+const startServer = async () => {
+  try {
+    await connectDB();
+    console.log("DB Connected");
+
+    app.listen(port, () => {
+      console.log(`Server Started on http://localhost:${port}`);
+    });
+  } catch (error) {
+    console.error("Database connection error:", error);
+    process.exit(1);
+  }
+};
+
+startServer();

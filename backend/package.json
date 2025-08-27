@@ -19,12 +19,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@paypal/checkout-server-sdk": "^1.0.3",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^3.0.2",
     "body-parser": "^1.20.3",
     "cores": "^0.8.0",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
+    "dotenv": "^16.6.1",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.9.5",
@@ -33,7 +34,7 @@
     "nodemailer": "^6.10.0",
     "nodemon": "^3.1.9",
     "razorpay": "^2.9.5",
-    "stripe": "^17.5.0",
+    "stripe": "^17.7.0",
     "validator": "^13.12.0"
   }
 }

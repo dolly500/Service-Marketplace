@@ -20,7 +20,7 @@ const serviceSchema = new mongoose.Schema({
     category: { 
         type: mongoose.Schema.Types.ObjectId, 
         required: true,
-        ref: 'category'
+        ref: 'category' 
     },
     location: {
         city: { 
@@ -56,7 +56,6 @@ const serviceSchema = new mongoose.Schema({
     }
 });
 
-// ✅ Correct geospatial index
 serviceSchema.index({ 
     'location.coordinates': '2dsphere' 
 });
@@ -67,6 +66,7 @@ serviceSchema.pre('save', function(next) {
     next();
 });
 
-const serviceModel = mongoose.model("service", serviceSchema);
+// Register model with capitalized name 'Service'
+const Service = mongoose.model("Service", serviceSchema);
 
-export default serviceModel;
+export default Service;
